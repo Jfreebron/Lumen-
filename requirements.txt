@@ -1,0 +1,4 @@
+groq
+psycopg2-binary
+fastapi
+uvicorn

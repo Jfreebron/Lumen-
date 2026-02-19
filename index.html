@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Data Analyst</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #fafafa;
+        }
+        h1 { margin-bottom: 30px; }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: #000; }
+        button {
+            padding: 14px 28px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover { background: #333; }
+        button:disabled { background: #999; cursor: not-allowed; }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th { background: #f5f5f5; font-weight: 600; }
+        tr:hover { background: #fafafa; }
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        #loading {
+            display: none;
+            margin-top: 20px;
+            color: #666;
+        }
+        .chart-container {
+            margin-top: 20px;
+            max-height: 400px;
+        }
+        h3 { margin: 0 0 15px 0; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+    <h1>AI Data Analyst</h1>
+
+    <div class="input-group">
+        <input type="text" id="question" placeholder="Ask a question about your data..." />
+        <button id="btn" onclick="ask()">Analyze</button>
+    </div>
+
+    <p id="loading">Analyzing your data...</p>
+
+    <div id="results"></div>
+
+    <script>
+        let chart = null;
+
+        async function ask() {
+            const q = document.getElementById('question').value.trim();
+            if (!q) return;
+
+            const btn = document.getElementById('btn');
+            btn.disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+            if (chart) { chart.destroy(); chart = null; }
+
+            try {
+                const res = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: q })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('results').innerHTML = `<div class="error">${data.detail}</div>`;
+                    return;
+                }
+
+                let html = '';
+
+                // SQL Card
+                html += `<div class="card"><h3>Generated SQL</h3><pre>${escapeHtml(data.sql)}</pre></div>`;
+
+                // Results Table
+                html += `<div class="card"><h3>Results (${data.rows.length} rows)</h3>`;
+                html += `<div style="overflow-x: auto;"><table><tr>`;
+                data.columns.forEach(c => html += `<th>${escapeHtml(c)}</th>`);
+                html += '</tr>';
+                data.rows.slice(0, 100).forEach(row => {
+                    html += '<tr>' + row.map(v => `<td>${escapeHtml(String(v ?? ''))}</td>`).join('') + '</tr>';
+                });
+                html += '</table></div></div>';
+
+                // Chart
+                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 50) {
+                    html += `<div class="card"><h3>Visualization</h3><div class="chart-container"><canvas id="chart"></canvas></div></div>`;
+                }
+
+                document.getElementById('results').innerHTML = html;
+
+                // Render chart if applicable
+                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 50) {
+                    const labels = data.rows.map(r => String(r[0]));
+                    const values = data.rows.map(r => parseFloat(r[1]));
+
+                    if (values.every(v => !isNaN(v))) {
+                        const ctx = document.getElementById('chart');
+                        chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: data.columns[1],
+                                    data: values,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                document.getElementById('results').innerHTML = `<div class="error">Network error: ${e.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('question').addEventListener('keypress', e => {
+            if (e.key === 'Enter') ask();
+        });
+    </script>
+</body>
+</html>
