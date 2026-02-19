@@ -936,3 +936,332 @@ def analyze_deadcode(req: DeadCodeRequest):
         raise
     except Exception as e:
         raise HTTPException(500, f"Analysis failed: {str(e)}")
+
+
+# ============== DEPENDENCY AUDITOR ==============
+
+# Known package alternatives (lighter/better options)
+PACKAGE_ALTERNATIVES = {
+    "moment": {"alternative": "date-fns or dayjs", "reason": "Moment.js is large and mutable. date-fns is modular and tree-shakeable."},
+    "lodash": {"alternative": "lodash-es or native JS", "reason": "Consider using ES6+ native methods or lodash-es for tree-shaking."},
+    "underscore": {"alternative": "lodash-es or native JS", "reason": "Underscore is outdated. Use native JS or lodash-es."},
+    "request": {"alternative": "axios or node-fetch", "reason": "Request is deprecated. Use axios, node-fetch, or native fetch."},
+    "jquery": {"alternative": "vanilla JS", "reason": "Modern browsers support querySelector, fetch, etc. natively."},
+    "bluebird": {"alternative": "native Promises", "reason": "Native Promises are now well-supported. Bluebird adds unnecessary weight."},
+    "async": {"alternative": "async/await", "reason": "Native async/await is cleaner and well-supported."},
+    "chalk": {"alternative": "picocolors", "reason": "picocolors is much smaller (~3x) with same functionality."},
+    "colors": {"alternative": "picocolors", "reason": "colors has had security issues. Use picocolors instead."},
+    "uuid": {"alternative": "crypto.randomUUID()", "reason": "Node 14.17+ and modern browsers have native UUID support."},
+    "node-fetch": {"alternative": "native fetch", "reason": "Node 18+ has native fetch support."},
+    "axios": {"alternative": "native fetch", "reason": "Consider native fetch for simpler use cases."},
+    "classnames": {"alternative": "clsx", "reason": "clsx is smaller and faster."},
+    "left-pad": {"alternative": "String.prototype.padStart()", "reason": "Native padStart() does the same thing."},
+}
+
+# Known vulnerable packages (simplified - in production would use real CVE database)
+KNOWN_VULNERABILITIES = {
+    "lodash": {"versions": ["<4.17.21"], "severity": "high", "description": "Prototype pollution vulnerability", "fixed_in": "4.17.21"},
+    "minimist": {"versions": ["<1.2.6"], "severity": "critical", "description": "Prototype pollution vulnerability", "fixed_in": "1.2.6"},
+    "node-fetch": {"versions": ["<2.6.7", "<3.1.1"], "severity": "high", "description": "Exposure of sensitive information", "fixed_in": "2.6.7 / 3.1.1"},
+    "axios": {"versions": ["<0.21.2", "<1.6.0"], "severity": "medium", "description": "Server-Side Request Forgery", "fixed_in": "0.21.2 / 1.6.0"},
+    "shell-quote": {"versions": ["<1.7.3"], "severity": "critical", "description": "Command injection vulnerability", "fixed_in": "1.7.3"},
+    "jsonwebtoken": {"versions": ["<9.0.0"], "severity": "medium", "description": "Insecure default algorithm", "fixed_in": "9.0.0"},
+    "express": {"versions": ["<4.19.2"], "severity": "medium", "description": "Open redirect vulnerability", "fixed_in": "4.19.2"},
+    "tar": {"versions": ["<6.2.1"], "severity": "high", "description": "Arbitrary file overwrite", "fixed_in": "6.2.1"},
+    "semver": {"versions": ["<7.5.2"], "severity": "medium", "description": "ReDoS vulnerability", "fixed_in": "7.5.2"},
+}
+
+
+def fetch_package_file(owner: str, repo: str, branch: str, filepath: str, token: Optional[str] = None) -> Optional[str]:
+    """Fetch a specific file from GitHub"""
+    headers = get_github_headers(token)
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{filepath}?ref={branch}"
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return None
+
+    data = response.json()
+    content = data.get("content", "")
+
+    try:
+        return base64.b64decode(content).decode("utf-8")
+    except:
+        return None
+
+
+def parse_package_json(content: str) -> Dict:
+    """Parse package.json and extract dependencies"""
+    import json
+    try:
+        data = json.loads(content)
+        deps = {}
+        dev_deps = {}
+
+        for name, version in data.get("dependencies", {}).items():
+            deps[name] = version.lstrip("^~>=<")
+
+        for name, version in data.get("devDependencies", {}).items():
+            dev_deps[name] = version.lstrip("^~>=<")
+
+        return {
+            "type": "npm",
+            "dependencies": deps,
+            "devDependencies": dev_deps,
+            "name": data.get("name", ""),
+            "version": data.get("version", "")
+        }
+    except:
+        return {"type": "npm", "dependencies": {}, "devDependencies": {}}
+
+
+def parse_requirements_txt(content: str) -> Dict:
+    """Parse requirements.txt and extract dependencies"""
+    deps = {}
+    for line in content.split("\n"):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        # Handle different formats: package==version, package>=version, package
+        match = re.match(r'^([a-zA-Z0-9_-]+)([=<>!]+)?(.+)?$', line)
+        if match:
+            name = match.group(1).lower()
+            version = match.group(3) or "latest"
+            deps[name] = version
+
+    return {
+        "type": "pip",
+        "dependencies": deps,
+        "devDependencies": {}
+    }
+
+
+def check_vulnerabilities(dependencies: Dict[str, str]) -> List[Dict]:
+    """Check dependencies against known vulnerabilities"""
+    vulnerabilities = []
+
+    for pkg, version in dependencies.items():
+        pkg_lower = pkg.lower()
+        if pkg_lower in KNOWN_VULNERABILITIES:
+            vuln = KNOWN_VULNERABILITIES[pkg_lower]
+            # Simplified version check - in production would use semver comparison
+            vulnerabilities.append({
+                "package": pkg,
+                "version": version,
+                "severity": vuln["severity"],
+                "vulnerability": vuln["description"],
+                "fixed_in": vuln["fixed_in"]
+            })
+
+    return vulnerabilities
+
+
+def find_unused_dependencies(owner: str, repo: str, branch: str, dependencies: Dict[str, str], pkg_type: str, token: Optional[str] = None) -> List[Dict]:
+    """Find dependencies that appear to be unused in the codebase"""
+    unused = []
+
+    # Fetch file tree
+    try:
+        files = fetch_repo_files(owner, repo, branch, token)
+    except:
+        return unused
+
+    # Build a combined content string from code files (limited for performance)
+    code_content = ""
+    files_to_check = [f for f in files if f["path"].endswith(('.js', '.jsx', '.ts', '.tsx', '.py'))][:50]
+
+    for file_info in files_to_check:
+        content = fetch_file_content(owner, repo, file_info["sha"], token)
+        if content:
+            code_content += content + "\n"
+
+    # Check each dependency
+    for pkg, version in dependencies.items():
+        # Generate patterns to search for
+        pkg_patterns = [pkg]
+
+        # For scoped packages like @types/node, check for the package name
+        if pkg.startswith("@"):
+            parts = pkg.split("/")
+            if len(parts) > 1:
+                pkg_patterns.append(parts[1])
+
+        # Check if package is imported/required anywhere
+        found = False
+        for pattern in pkg_patterns:
+            # Common import patterns
+            search_patterns = [
+                f"from ['\"].*{re.escape(pattern)}.*['\"]",  # ES6 import
+                f"require\\(['\"].*{re.escape(pattern)}.*['\"]\\)",  # CommonJS
+                f"import ['\"].*{re.escape(pattern)}.*['\"]",  # Side-effect import
+                f"import.*{re.escape(pattern)}",  # Python import
+            ]
+
+            for search_pattern in search_patterns:
+                if re.search(search_pattern, code_content, re.IGNORECASE):
+                    found = True
+                    break
+
+            if found:
+                break
+
+        if not found:
+            # Skip common dev tools that might not be directly imported
+            dev_tools = ['typescript', 'eslint', 'prettier', 'jest', 'mocha', 'chai',
+                        'webpack', 'babel', 'rollup', 'vite', 'esbuild', 'tsup',
+                        '@types/', 'husky', 'lint-staged', 'commitlint', 'nodemon']
+
+            is_dev_tool = any(tool in pkg.lower() for tool in dev_tools)
+
+            if not is_dev_tool:
+                unused.append({
+                    "package": pkg,
+                    "version": version,
+                    "reason": "No imports found in codebase"
+                })
+
+    return unused
+
+
+def get_package_suggestions(dependencies: Dict[str, str]) -> List[Dict]:
+    """Get suggestions for package optimizations"""
+    suggestions = []
+
+    for pkg in dependencies.keys():
+        pkg_lower = pkg.lower()
+        if pkg_lower in PACKAGE_ALTERNATIVES:
+            alt = PACKAGE_ALTERNATIVES[pkg_lower]
+            suggestions.append({
+                "package": pkg,
+                "suggestion": alt["reason"],
+                "alternative": alt["alternative"]
+            })
+
+    return suggestions
+
+
+def get_outdated_packages_ai(dependencies: Dict[str, str], pkg_type: str) -> List[Dict]:
+    """Use AI to identify potentially outdated packages"""
+    if not dependencies:
+        return []
+
+    # Limit to 20 packages for AI analysis
+    deps_list = list(dependencies.items())[:20]
+    deps_str = "\n".join([f"- {name}: {version}" for name, version in deps_list])
+
+    prompt = f"""Analyze these {pkg_type} packages and identify which ones are likely outdated (more than 1 year old or have known newer major versions).
+
+Packages:
+{deps_str}
+
+For each outdated package, provide:
+1. The package name
+2. Current version shown
+3. Approximate latest version (if you know it)
+4. Brief reason why it should be updated
+
+Return ONLY a JSON array. Each item must have: package, current, latest, description
+If no packages are outdated, return an empty array: []
+Return ONLY valid JSON."""
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=800,
+            temperature=0
+        )
+
+        result = response.choices[0].message.content.strip()
+
+        # Extract JSON
+        if "[" in result:
+            start = result.index("[")
+            end = result.rindex("]") + 1
+            import json
+            return json.loads(result[start:end])
+    except:
+        pass
+
+    return []
+
+
+@app.post("/api/deps/audit")
+def audit_dependencies(req: DeadCodeRequest):
+    """Audit dependencies in a GitHub repository"""
+
+    try:
+        # Try to fetch package.json first (Node.js)
+        package_json = fetch_package_file(req.owner, req.repo, req.branch, "package.json", req.token)
+
+        if package_json:
+            pkg_data = parse_package_json(package_json)
+        else:
+            # Try requirements.txt (Python)
+            requirements = fetch_package_file(req.owner, req.repo, req.branch, "requirements.txt", req.token)
+
+            if requirements:
+                pkg_data = parse_requirements_txt(requirements)
+            else:
+                raise HTTPException(404, "No package.json or requirements.txt found in repository")
+
+        all_deps = {**pkg_data["dependencies"], **pkg_data["devDependencies"]}
+
+        if not all_deps:
+            return {
+                "repository": {"name": f"{req.owner}/{req.repo}"},
+                "package_type": pkg_data["type"],
+                "total_dependencies": 0,
+                "health_score": 100,
+                "security_issues": [],
+                "unused": [],
+                "outdated": [],
+                "suggestions": []
+            }
+
+        # Check for vulnerabilities
+        security_issues = check_vulnerabilities(all_deps)
+
+        # Find unused dependencies
+        unused = find_unused_dependencies(req.owner, req.repo, req.branch, pkg_data["dependencies"], pkg_data["type"], req.token)
+
+        # Get suggestions
+        suggestions = get_package_suggestions(all_deps)
+
+        # Get outdated packages (AI-assisted)
+        outdated = get_outdated_packages_ai(all_deps, pkg_data["type"])
+
+        # Calculate health score
+        total_deps = len(all_deps)
+        score = 100
+
+        # Deduct for security issues
+        critical_vulns = len([v for v in security_issues if v["severity"] == "critical"])
+        high_vulns = len([v for v in security_issues if v["severity"] == "high"])
+        score -= critical_vulns * 15
+        score -= high_vulns * 10
+
+        # Deduct for unused deps
+        unused_pct = (len(unused) / max(total_deps, 1)) * 100
+        score -= min(unused_pct * 0.3, 15)
+
+        # Deduct for outdated deps
+        outdated_pct = (len(outdated) / max(total_deps, 1)) * 100
+        score -= min(outdated_pct * 0.2, 10)
+
+        return {
+            "repository": {"name": f"{req.owner}/{req.repo}"},
+            "package_type": pkg_data["type"],
+            "total_dependencies": total_deps,
+            "health_score": max(0, round(score)),
+            "security_issues": security_issues,
+            "unused": unused,
+            "outdated": outdated,
+            "suggestions": suggestions
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Audit failed: {str(e)}")

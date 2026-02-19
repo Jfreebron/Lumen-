@@ -1148,6 +1148,258 @@
             opacity: 0.5;
         }
 
+        /* Dependency Auditor Styles */
+        .deps-health-banner {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            padding: 28px 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .health-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .health-circle .health-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+        }
+
+        .health-circle .health-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .health-details {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .health-stat {
+            text-align: center;
+        }
+
+        .health-stat .stat-value {
+            display: block;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .health-stat .stat-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .health-stat.warning .stat-value {
+            color: var(--error);
+        }
+
+        .deps-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .deps-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .deps-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .deps-section-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .deps-section-header.critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .deps-section-header.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .deps-section-header.info {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent);
+        }
+
+        .deps-section-header.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .deps-list {
+            padding: 12px;
+        }
+
+        .dep-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .dep-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .dep-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dep-name {
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .dep-version {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-left: 8px;
+        }
+
+        .dep-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .dep-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .dep-meta-item {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .dep-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .severity-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-badge.critical {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .severity-badge.high {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .severity-badge.medium {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+        }
+
+        .severity-badge.low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .alternative-badge {
+            font-size: 12px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .deps-all-good {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--success);
+        }
+
+        .deps-all-good svg {
+            margin-bottom: 16px;
+        }
+
+        .deps-all-good h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .deps-all-good p {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .deps-health-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .health-details {
+                justify-content: center;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .nav-tab {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+            }
+        }
+
         .relationship-item {
             display: flex;
             align-items: center;
@@ -1449,14 +1701,22 @@
                     <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
                     <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
                 </svg>
-                Database Analyzer
+                Database
             </button>
             <button class="nav-tab" onclick="switchPage('code')" id="tab-code">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="16 18 22 12 16 6"></polyline>
                     <polyline points="8 6 2 12 8 18"></polyline>
                 </svg>
-                Code Analyzer
+                Dead Code
+            </button>
+            <button class="nav-tab" onclick="switchPage('deps')" id="tab-deps">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                Dependencies
             </button>
         </div>
 
@@ -1593,6 +1853,193 @@
             </div>
         </div>
         <!-- END CODE ANALYZER PAGE -->
+
+        <!-- DEPENDENCY AUDITOR PAGE -->
+        <div id="page-deps" class="page-content" style="display: none;">
+            <!-- Deps Welcome State -->
+            <div id="deps-welcome" class="welcome">
+                <div class="welcome-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <h2>Dependency Auditor</h2>
+                <p>Analyze your project's dependencies for security issues, unused packages, and optimization opportunities.</p>
+
+                <div class="code-input-form">
+                    <div class="form-group">
+                        <label>GitHub Repository URL</label>
+                        <input type="text" class="form-input" id="deps-github-url" placeholder="https://github.com/username/repo" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Branch <span class="optional">(optional)</span></label>
+                            <input type="text" class="form-input" id="deps-github-branch" placeholder="main" />
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>GitHub Token <span class="optional">(optional)</span></label>
+                            <input type="password" class="form-input" id="deps-github-token" placeholder="ghp_xxxxx" />
+                        </div>
+                    </div>
+                    <div class="security-notice" style="margin-bottom: 16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>Supports package.json (Node.js) and requirements.txt (Python). Checks for vulnerabilities, unused packages, and suggests optimizations.</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="auditDependencies()" style="width: 100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Audit Dependencies
+                    </button>
+                </div>
+            </div>
+
+            <!-- Deps Analysis Progress -->
+            <div id="deps-progress" class="code-progress" style="display: none;">
+                <div class="progress-header">
+                    <h3>Auditing Dependencies</h3>
+                    <span id="deps-progress-status">Fetching package files...</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="deps-analysis-progress"></div>
+                </div>
+                <div class="progress-details" id="deps-progress-details"></div>
+            </div>
+
+            <!-- Deps Results -->
+            <div id="deps-results" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2 id="deps-repo-name">Repository</h2>
+                        <span class="badge" id="deps-type-badge">npm</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="generateDepsPrompt()">✦ Get Fix Prompt</button>
+                        <button class="btn btn-ghost" onclick="resetDepsAnalysis()">New Audit</button>
+                    </div>
+                </div>
+
+                <!-- Health Score -->
+                <div class="deps-health-banner" id="deps-health-banner">
+                    <div class="health-circle">
+                        <span class="health-value" id="deps-health-score">--</span>
+                        <span class="health-label">Health</span>
+                    </div>
+                    <div class="health-details">
+                        <div class="health-stat">
+                            <span class="stat-value" id="total-deps">0</span>
+                            <span class="stat-label">Dependencies</span>
+                        </div>
+                        <div class="health-stat warning">
+                            <span class="stat-value" id="security-issues">0</span>
+                            <span class="stat-label">Security Issues</span>
+                        </div>
+                        <div class="health-stat">
+                            <span class="stat-value" id="unused-deps">0</span>
+                            <span class="stat-label">Unused</span>
+                        </div>
+                        <div class="health-stat">
+                            <span class="stat-value" id="outdated-deps">0</span>
+                            <span class="stat-label">Outdated</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issues Sections -->
+                <div class="deps-sections">
+                    <!-- Security Vulnerabilities -->
+                    <div class="deps-section" id="security-section" style="display: none;">
+                        <div class="deps-section-header critical">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <h3>Security Vulnerabilities</h3>
+                        </div>
+                        <div class="deps-list" id="security-list"></div>
+                    </div>
+
+                    <!-- Unused Dependencies -->
+                    <div class="deps-section" id="unused-section" style="display: none;">
+                        <div class="deps-section-header warning">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <h3>Unused Dependencies</h3>
+                        </div>
+                        <div class="deps-list" id="unused-list"></div>
+                    </div>
+
+                    <!-- Outdated Dependencies -->
+                    <div class="deps-section" id="outdated-section" style="display: none;">
+                        <div class="deps-section-header info">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <h3>Outdated Packages</h3>
+                        </div>
+                        <div class="deps-list" id="outdated-list"></div>
+                    </div>
+
+                    <!-- Suggestions -->
+                    <div class="deps-section" id="suggestions-section" style="display: none;">
+                        <div class="deps-section-header success">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <h3>Optimization Suggestions</h3>
+                        </div>
+                        <div class="deps-list" id="suggestions-list"></div>
+                    </div>
+
+                    <!-- All Good Message -->
+                    <div class="deps-all-good" id="deps-all-good" style="display: none;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <h3>All Good!</h3>
+                        <p>No major issues found with your dependencies.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END DEPENDENCY AUDITOR PAGE -->
+
+        <!-- Deps Prompt Modal -->
+        <div id="deps-prompt-modal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Dependency Fix Prompt</h2>
+                    <p>Copy this prompt to fix dependency issues</p>
+                </div>
+                <div class="modal-body">
+                    <div class="claude-prompt-container">
+                        <pre id="deps-fix-prompt"></pre>
+                        <button class="copy-prompt-btn" onclick="copyDepsPrompt()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeDepsPromptModal()" style="width: 100%;">Close</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Code Prompt Modal -->
         <div id="code-prompt-modal" class="modal-overlay">
@@ -1873,6 +2320,256 @@
 
         function closeCodePromptModal() {
             document.getElementById('code-prompt-modal').classList.remove('active');
+        }
+
+        // ============== DEPENDENCY AUDITOR ==============
+        let depsData = null;
+
+        async function auditDependencies() {
+            const urlInput = document.getElementById('deps-github-url').value.trim();
+            const branch = document.getElementById('deps-github-branch').value.trim() || 'main';
+            const token = document.getElementById('deps-github-token').value.trim();
+
+            if (!urlInput) {
+                alert('Please enter a GitHub repository URL');
+                return;
+            }
+
+            // Parse GitHub URL
+            const match = urlInput.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+            if (!match) {
+                alert('Invalid GitHub URL. Please use format: https://github.com/username/repo');
+                return;
+            }
+
+            const owner = match[1];
+            const repo = match[2].replace(/\.git$/, '');
+
+            // Save token if provided
+            if (token) saveGitHubToken(token);
+
+            // Show progress
+            document.getElementById('deps-welcome').style.display = 'none';
+            document.getElementById('deps-progress').style.display = 'block';
+            document.getElementById('deps-results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/deps/audit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        owner,
+                        repo,
+                        branch,
+                        token: token || getGitHubToken()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Store data globally
+                depsData = data;
+
+                // Show results
+                displayDepsResults(data);
+
+            } catch (error) {
+                alert('Audit failed: ' + error.message);
+                resetDepsAnalysis();
+            }
+        }
+
+        function displayDepsResults(data) {
+            document.getElementById('deps-progress').style.display = 'none';
+            document.getElementById('deps-results').style.display = 'block';
+
+            // Set repo name and type
+            document.getElementById('deps-repo-name').textContent = data.repository?.name || 'Repository';
+            document.getElementById('deps-type-badge').textContent = data.package_type || 'npm';
+
+            // Health score
+            document.getElementById('deps-health-score').textContent = data.health_score || 100;
+
+            // Stats
+            document.getElementById('total-deps').textContent = data.total_dependencies || 0;
+            document.getElementById('security-issues').textContent = data.security_issues?.length || 0;
+            document.getElementById('unused-deps').textContent = data.unused?.length || 0;
+            document.getElementById('outdated-deps').textContent = data.outdated?.length || 0;
+
+            // Security issues
+            const securitySection = document.getElementById('security-section');
+            const securityList = document.getElementById('security-list');
+            if (data.security_issues && data.security_issues.length > 0) {
+                securitySection.style.display = 'block';
+                securityList.innerHTML = data.security_issues.map(issue => `
+                    <div class="dep-item">
+                        <div class="dep-info">
+                            <span class="dep-name">${escapeHtml(issue.package)}</span>
+                            <span class="dep-version">${escapeHtml(issue.version || '')}</span>
+                            <div class="dep-description">${escapeHtml(issue.vulnerability || issue.description || 'Security vulnerability detected')}</div>
+                            ${issue.fixed_in ? `<div class="dep-meta"><span class="dep-meta-item">✓ Fixed in ${escapeHtml(issue.fixed_in)}</span></div>` : ''}
+                        </div>
+                        <div class="dep-actions">
+                            <span class="severity-badge ${issue.severity || 'high'}">${issue.severity || 'high'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                securitySection.style.display = 'none';
+            }
+
+            // Unused dependencies
+            const unusedSection = document.getElementById('unused-section');
+            const unusedList = document.getElementById('unused-list');
+            if (data.unused && data.unused.length > 0) {
+                unusedSection.style.display = 'block';
+                unusedList.innerHTML = data.unused.map(dep => `
+                    <div class="dep-item">
+                        <div class="dep-info">
+                            <span class="dep-name">${escapeHtml(dep.package)}</span>
+                            <span class="dep-version">${escapeHtml(dep.version || '')}</span>
+                            <div class="dep-description">${escapeHtml(dep.reason || 'No imports found in codebase')}</div>
+                        </div>
+                        <div class="dep-actions">
+                            <span class="severity-badge medium">unused</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                unusedSection.style.display = 'none';
+            }
+
+            // Outdated dependencies
+            const outdatedSection = document.getElementById('outdated-section');
+            const outdatedList = document.getElementById('outdated-list');
+            if (data.outdated && data.outdated.length > 0) {
+                outdatedSection.style.display = 'block';
+                outdatedList.innerHTML = data.outdated.map(dep => `
+                    <div class="dep-item">
+                        <div class="dep-info">
+                            <span class="dep-name">${escapeHtml(dep.package)}</span>
+                            <span class="dep-version">${escapeHtml(dep.current || '')} → ${escapeHtml(dep.latest || '')}</span>
+                            <div class="dep-description">${escapeHtml(dep.description || 'Newer version available')}</div>
+                        </div>
+                        <div class="dep-actions">
+                            <span class="severity-badge low">outdated</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                outdatedSection.style.display = 'none';
+            }
+
+            // Suggestions
+            const suggestionsSection = document.getElementById('suggestions-section');
+            const suggestionsList = document.getElementById('suggestions-list');
+            if (data.suggestions && data.suggestions.length > 0) {
+                suggestionsSection.style.display = 'block';
+                suggestionsList.innerHTML = data.suggestions.map(sug => `
+                    <div class="dep-item">
+                        <div class="dep-info">
+                            <span class="dep-name">${escapeHtml(sug.package)}</span>
+                            <div class="dep-description">${escapeHtml(sug.suggestion)}</div>
+                            ${sug.alternative ? `<div class="alternative-badge">→ Consider: <strong>${escapeHtml(sug.alternative)}</strong></div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                suggestionsSection.style.display = 'none';
+            }
+
+            // All good message
+            const allGood = document.getElementById('deps-all-good');
+            const hasIssues = (data.security_issues?.length || 0) + (data.unused?.length || 0) + (data.outdated?.length || 0) + (data.suggestions?.length || 0);
+            allGood.style.display = hasIssues === 0 ? 'block' : 'none';
+        }
+
+        function resetDepsAnalysis() {
+            document.getElementById('deps-welcome').style.display = 'block';
+            document.getElementById('deps-progress').style.display = 'none';
+            document.getElementById('deps-results').style.display = 'none';
+            depsData = null;
+        }
+
+        function generateDepsPrompt() {
+            if (!depsData) {
+                alert('No audit data available.');
+                return;
+            }
+
+            const repoName = document.getElementById('deps-repo-name').textContent;
+            let prompt = `I need help fixing dependency issues in my repository "${repoName}".\n\n`;
+            prompt += `Package type: ${depsData.package_type || 'npm'}\n\n`;
+
+            if (depsData.security_issues && depsData.security_issues.length > 0) {
+                prompt += `## Security Vulnerabilities (${depsData.security_issues.length})\n`;
+                depsData.security_issues.forEach(issue => {
+                    prompt += `- **${issue.package}** (${issue.severity}): ${issue.vulnerability || 'Vulnerability detected'}`;
+                    if (issue.fixed_in) prompt += ` - Fixed in ${issue.fixed_in}`;
+                    prompt += '\n';
+                });
+                prompt += '\n';
+            }
+
+            if (depsData.unused && depsData.unused.length > 0) {
+                prompt += `## Unused Dependencies (${depsData.unused.length})\n`;
+                depsData.unused.forEach(dep => {
+                    prompt += `- ${dep.package}\n`;
+                });
+                prompt += '\n';
+            }
+
+            if (depsData.outdated && depsData.outdated.length > 0) {
+                prompt += `## Outdated Packages (${depsData.outdated.length})\n`;
+                depsData.outdated.slice(0, 10).forEach(dep => {
+                    prompt += `- ${dep.package}: ${dep.current} → ${dep.latest}\n`;
+                });
+                if (depsData.outdated.length > 10) {
+                    prompt += `- ... and ${depsData.outdated.length - 10} more\n`;
+                }
+                prompt += '\n';
+            }
+
+            if (depsData.suggestions && depsData.suggestions.length > 0) {
+                prompt += `## Suggestions\n`;
+                depsData.suggestions.forEach(sug => {
+                    prompt += `- ${sug.package}: ${sug.suggestion}`;
+                    if (sug.alternative) prompt += ` (consider ${sug.alternative})`;
+                    prompt += '\n';
+                });
+                prompt += '\n';
+            }
+
+            prompt += `## Request\n`;
+            prompt += `Please help me:\n`;
+            prompt += `1. Fix security vulnerabilities by updating or replacing affected packages\n`;
+            prompt += `2. Remove unused dependencies safely\n`;
+            prompt += `3. Update outdated packages (check for breaking changes)\n`;
+            prompt += `4. Provide the commands I need to run to implement these fixes\n`;
+
+            document.getElementById('deps-fix-prompt').textContent = prompt;
+            document.getElementById('deps-prompt-modal').classList.add('active');
+        }
+
+        function copyDepsPrompt() {
+            const content = document.getElementById('deps-fix-prompt').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const btn = document.querySelector('#deps-prompt-modal .copy-prompt-btn');
+                btn.classList.add('copied');
+                btn.querySelector('span').textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.querySelector('span').textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function closeDepsPromptModal() {
+            document.getElementById('deps-prompt-modal').classList.remove('active');
         }
 
         function getDbUrl() {
