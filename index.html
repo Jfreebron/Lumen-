@@ -1,576 +1,967 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Data Analyst</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumen | AI Data Analyst</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-            background: #fafafa;
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #141415;
+            --bg-tertiary: #1c1c1e;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
         }
-        h1 { margin-bottom: 10px; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(139, 92, 246, 0.1), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 48px;
         }
-        .input-group {
+
+        .logo {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 12px;
         }
-        input, textarea {
-            flex: 1;
-            padding: 14px 18px;
-            font-size: 16px;
-            border: 2px solid #e0e0e0;
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            margin-left: 8px;
+            padding: 4px 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
             border-radius: 10px;
-            outline: none;
-            transition: border-color 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
             font-family: inherit;
         }
-        input:focus, textarea:focus { border-color: #000; }
-        button {
-            padding: 14px 28px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        button:hover { background: #333; }
-        button:disabled { background: #999; cursor: not-allowed; }
-        .btn-secondary {
-            background: #fff;
-            color: #000;
-            border: 2px solid #e0e0e0;
-            padding: 10px 20px;
-            font-size: 14px;
-        }
-        .btn-secondary:hover { background: #f5f5f5; }
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 13px;
-            border-radius: 8px;
-        }
-        pre {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 10px;
-            overflow-x: auto;
-            font-size: 14px;
-        }
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 10px 12px;
-            text-align: left;
-            font-size: 14px;
-        }
-        th { background: #f5f5f5; font-weight: 600; }
-        tr:hover { background: #fafafa; }
-        .error {
-            background: #fee;
-            color: #c00;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        #loading {
-            display: none;
-            margin-top: 20px;
-            color: #666;
-        }
-        .chart-container {
-            margin-top: 20px;
-            height: 300px;
-        }
-        h3 { margin: 0 0 15px 0; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Data Browser Styles */
-        .data-browser {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
-        .data-browser-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
         }
-        .data-browser-header h2 {
-            margin: 0;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
-        .badge {
-            background: #e8f4f8;
-            color: #0369a1;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.15);
         }
-        .table-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
         }
-        .table-chip {
-            background: #f5f5f5;
-            border: 1px solid #e0e0e0;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
+
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Connection button */
+        .connection-btn {
             display: flex;
             align-items: center;
             gap: 8px;
         }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--error);
+        }
+
+        .status-indicator.connected {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        /* Welcome Section */
+        .welcome {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 32px;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .welcome h2 {
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 32px;
+        }
+
+        /* Data Browser */
+        .data-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            color: var(--accent-light);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Table Grid */
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .table-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .table-grid::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .table-grid::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .table-chip {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 14px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .table-chip:hover {
-            background: #e8f4f8;
-            border-color: #0369a1;
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            transform: translateY(-2px);
         }
+
         .table-chip .icon {
-            font-size: 16px;
+            font-size: 18px;
         }
+
         .table-chip .name {
-            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         /* Suggestions */
-        .suggestions {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e0e0e0;
+        .suggestions-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
         }
-        .suggestions h4 {
-            margin: 0 0 10px 0;
-            font-size: 13px;
-            color: #666;
-            font-weight: 500;
+
+        .suggestions-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
+
         .suggestion-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-        }
-        .suggestion-chip {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-        }
-        .suggestion-chip:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Schema Modal */
-        .schema-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .schema-modal.active { display: flex; }
-        .schema-content {
-            background: #fff;
-            padding: 30px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            margin: 20px;
-        }
-        .schema-content h2 {
-            margin: 0 0 5px 0;
-            display: flex;
-            align-items: center;
             gap: 10px;
         }
-        .schema-content .table-desc {
-            color: #666;
+
+        .suggestion-chip {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Query Input */
+        .query-section {
+            margin-bottom: 24px;
+        }
+
+        .query-input-wrapper {
+            display: flex;
+            gap: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 8px;
+            transition: border-color 0.2s ease;
+        }
+
+        .query-input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .query-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+        }
+
+        .query-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .query-btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .results-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
             margin-bottom: 20px;
-            font-size: 14px;
+            backdrop-filter: blur(10px);
         }
-        .column-list {
-            background: #f9fafb;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        .column-item {
+
+        .results-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 14px;
-        }
-        .column-item:last-child { border-bottom: none; }
-        .column-name { font-weight: 500; }
-        .column-type { color: #666; font-family: monospace; font-size: 12px; }
-        .ask-about {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #e0e0e0;
+            align-items: center;
         }
 
-        /* Modal styles */
-        .modal {
+        .results-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-header .count {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .results-body {
+            padding: 20px 24px;
+            overflow-x: auto;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-secondary);
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        /* Chart */
+        .chart-container {
+            height: 300px;
+            padding: 20px;
+        }
+
+        /* SQL Toggle */
+        .sql-section {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .sql-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-tertiary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .sql-toggle:hover {
+            color: var(--text-secondary);
+        }
+
+        .sql-content {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .sql-content.active {
+            display: block;
+        }
+
+        .sql-content pre {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--accent-light);
+        }
+
+        /* Error */
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        /* Modals */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: #fff;
-            padding: 30px;
-            border-radius: 16px;
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
             width: 100%;
             max-width: 500px;
-            margin: 20px;
-        }
-        .modal h2 { margin: 0 0 20px 0; }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-        }
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .status-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .status-dot.connected { background: #22c55e; }
-        .status-dot.disconnected { background: #ef4444; }
-
-        /* Welcome state */
-        .welcome {
-            text-align: center;
-            padding: 60px 20px;
-            background: #fff;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .welcome h2 {
-            margin: 0 0 10px 0;
-        }
-        .welcome p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        /* Hide technical details by default */
-        .sql-toggle {
-            color: #666;
-            font-size: 13px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .sql-toggle:hover { color: #000; }
-        .sql-hidden { display: none; }
-
-        /* Insights styles */
-        .insights-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
+            max-height: 90vh;
             overflow-y: auto;
         }
-        .insights-modal.active { display: block; }
-        .insights-content {
-            background: #fff;
-            margin: 40px auto;
-            max-width: 900px;
-            border-radius: 16px;
-            overflow: hidden;
+
+        .modal-header {
+            padding: 28px 28px 0;
         }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .modal-body {
+            padding: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .modal-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .modal-tab.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            padding: 20px 28px 28px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            padding: 14px;
+        }
+
+        /* Insights Modal */
+        .insights-modal .modal {
+            max-width: 800px;
+        }
+
         .insights-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            padding: 30px;
+            background: var(--gradient);
+            padding: 32px;
+            border-radius: 24px 24px 0 0;
         }
+
         .insights-header h2 {
-            margin: 0 0 10px 0;
             font-size: 24px;
+            margin-bottom: 16px;
         }
+
         .health-score {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.2);
-            padding: 10px 20px;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
             border-radius: 30px;
-            font-size: 18px;
-            font-weight: 600;
+            backdrop-filter: blur(10px);
         }
-        .health-score .score {
+
+        .health-score .value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .ai-summary {
+            background: var(--accent-glow);
+            border-left: 3px solid var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card .value {
             font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .insights-body {
-            padding: 30px;
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
         }
+
         .insight-section {
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
+
         .insight-section h3 {
-            margin: 0 0 15px 0;
-            font-size: 16px;
-            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .ai-summary {
-            background: #f0f9ff;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        .stat-card {
-            background: #f9fafb;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .stat-card .value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #333;
-        }
-        .stat-card .label {
-            font-size: 13px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .relationship-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+
         .relationship-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 15px;
-            background: #f9fafb;
-            border-radius: 8px;
+            gap: 12px;
+            padding: 14px 18px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 8px;
             font-size: 14px;
         }
+
         .relationship-arrow {
-            color: #667eea;
-            font-weight: bold;
+            color: var(--accent);
+            font-weight: 600;
         }
-        .issue-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            background: #fef2f2;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-        .issue-item.warning {
-            background: #fffbeb;
-        }
-        .issue-badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-        .issue-badge.empty { background: #fee2e2; color: #b91c1c; }
-        .issue-badge.nulls { background: #fef3c7; color: #b45309; }
-        .issue-badge.no-pk { background: #e0e7ff; color: #4338ca; }
+
         .key-table-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 15px;
-            background: #f0fdf4;
-            border-radius: 8px;
+            padding: 14px 18px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             margin-bottom: 8px;
         }
-        .key-table-item .refs {
-            background: #22c55e;
-            color: #fff;
+
+        .refs-badge {
+            background: var(--success);
+            color: white;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
+
+        .issue-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .issue-item.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .issue-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .issue-badge.empty { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .issue-badge.nulls { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .issue-badge.no-pk { background: rgba(99, 102, 241, 0.2); color: var(--accent-light); }
+
+        /* Schema Modal */
+        .column-list {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .column-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .column-item:last-child {
+            border-bottom: none;
+        }
+
+        .column-name {
+            font-weight: 500;
+        }
+
+        .column-type {
+            color: var(--text-tertiary);
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .table-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <h2>Database Connection</h2>
+    <div class="bg-gradient"></div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
-                <button class="tab-btn active" onclick="switchTab('fields')" id="tab-fields" style="background:none; border:none; padding: 10px 20px; cursor:pointer; font-weight: 500; border-bottom: 2px solid #000; margin-bottom: -2px;">Fields</button>
-                <button class="tab-btn" onclick="switchTab('url')" id="tab-url" style="background:none; border:none; padding: 10px 20px; cursor:pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px;">Connection String</button>
+    <!-- Connection Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Connect Database</h2>
+                <p>Enter your PostgreSQL credentials</p>
             </div>
-
-            <div id="fields-tab">
-                <div class="form-group">
-                    <label>Host</label>
-                    <input type="text" id="db-host" placeholder="db.example.com" />
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchTab('fields')" id="tab-fields">Credentials</button>
+                    <button class="modal-tab" onclick="switchTab('url')" id="tab-url">Connection String</button>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Port</label>
-                        <input type="text" id="db-port" placeholder="5432" value="5432" />
+
+                <div id="fields-tab">
+                    <div class="form-group">
+                        <label>Host</label>
+                        <input type="text" class="form-input" id="db-host" placeholder="db.example.com" />
                     </div>
-                    <div class="form-group" style="flex: 2;">
-                        <label>Database Name</label>
-                        <input type="text" id="db-name" placeholder="my_database" />
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Port</label>
+                            <input type="text" class="form-input" id="db-port" value="5432" />
+                        </div>
+                        <div class="form-group">
+                            <label>Database</label>
+                            <input type="text" class="form-input" id="db-name" placeholder="my_database" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-input" id="db-user" placeholder="admin" />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-input" id="db-password" placeholder="••••••••" />
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="db-ssl" checked />
+                            <span>Use SSL (recommended)</span>
+                        </label>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" id="db-user" placeholder="admin" />
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="db-password" placeholder="********" />
-                </div>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="db-ssl" checked style="width: auto;" />
-                        Use SSL (recommended)
-                    </label>
+
+                <div id="url-tab" style="display: none;">
+                    <div class="form-group">
+                        <label>Connection String</label>
+                        <textarea class="form-input" id="db-url" rows="3" placeholder="postgresql://user:pass@host:5432/db"></textarea>
+                    </div>
                 </div>
             </div>
-
-            <div id="url-tab" style="display: none;">
-                <div class="form-group">
-                    <label>Connection String</label>
-                    <textarea id="db-url" placeholder="postgresql://user:password@host:port/database"></textarea>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button onclick="saveSettings()">Connect</button>
-                <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Connect</button>
             </div>
         </div>
     </div>
 
     <!-- Insights Modal -->
-    <div id="insights-modal" class="insights-modal">
-        <div class="insights-content">
+    <div id="insights-modal" class="modal-overlay insights-modal">
+        <div class="modal">
             <div class="insights-header">
-                <h2>🔍 Database Insights</h2>
+                <h2>Database Insights</h2>
                 <div class="health-score">
-                    <span>Health Score:</span>
-                    <span class="score" id="health-score-value">--</span>
+                    <span>Health Score</span>
+                    <span class="value" id="health-score-value">--</span>
                     <span>/ 100</span>
                 </div>
             </div>
-            <div class="insights-body">
+            <div class="modal-body">
                 <div id="ai-summary-section" class="ai-summary" style="display: none;"></div>
 
-                <div class="insight-section">
-                    <h3>📊 Overview</h3>
-                    <div class="stat-grid" id="stats-grid"></div>
-                </div>
+                <div class="stats-grid" id="stats-grid"></div>
 
                 <div class="insight-section">
-                    <h3>🔗 Data Relationships</h3>
-                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">How your tables connect to each other</p>
-                    <div class="relationship-list" id="relationships-list"></div>
+                    <h3>🔗 Relationships</h3>
+                    <div id="relationships-list"></div>
                 </div>
 
                 <div class="insight-section">
                     <h3>⭐ Key Tables</h3>
-                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Most connected tables in your database</p>
                     <div id="key-tables-list"></div>
                 </div>
 
                 <div class="insight-section">
-                    <h3>⚠️ Issues to Review</h3>
+                    <h3>⚠️ Issues</h3>
                     <div id="issues-list"></div>
                 </div>
 
@@ -578,98 +969,108 @@
                     <h3>💡 Suggested Questions</h3>
                     <div class="suggestion-chips" id="insight-suggestions"></div>
                 </div>
-
-                <div class="form-actions" style="margin-top: 30px;">
-                    <button class="btn-secondary" onclick="closeInsightsModal()" style="width: 100%;">Close</button>
-                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeInsightsModal()" style="width: 100%;">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Stats Modal -->
-    <div id="stats-modal" class="schema-modal">
-        <div class="schema-content">
-            <h2>📊 Table Statistics</h2>
-            <p class="table-desc">Row counts for all tables in your database.</p>
-            <div id="stats-content" style="max-height: 400px; overflow-y: auto;">
-                <p>Loading...</p>
+    <div id="stats-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Table Statistics</h2>
+                <p>Row counts for all tables</p>
             </div>
-            <div class="form-actions">
-                <button class="btn-secondary" onclick="closeStatsModal()" style="width: 100%;">Close</button>
+            <div class="modal-body" id="stats-content" style="max-height: 400px; overflow-y: auto;">
+                <p style="color: var(--text-tertiary);">Loading...</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeStatsModal()" style="width: 100%;">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Schema Modal -->
-    <div id="schema-modal" class="schema-modal">
-        <div class="schema-content">
-            <h2>
-                <span style="font-size: 24px;">📊</span>
-                <span id="schema-table-name"></span>
-            </h2>
-            <p class="table-desc" id="schema-table-desc"></p>
-            <h3>Columns</h3>
-            <div class="column-list" id="schema-columns"></div>
-            <div class="ask-about">
-                <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #666;">Ask about this data:</h4>
-                <div id="schema-suggestions" class="suggestion-chips"></div>
+    <div id="schema-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="schema-table-name"></h2>
+                <p id="schema-table-desc"></p>
             </div>
-            <div class="form-actions">
-                <button class="btn-secondary" onclick="closeSchemaModal()" style="width: 100%;">Close</button>
+            <div class="modal-body">
+                <div class="column-list" id="schema-columns"></div>
+                <div class="insight-section" style="margin-top: 24px;">
+                    <h3>Ask about this data</h3>
+                    <div class="suggestion-chips" id="schema-suggestions"></div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <div class="header">
-        <h1>AI Data Analyst</h1>
-        <button class="btn-secondary" onclick="openSettings()">
-            <span id="status-dot" class="status-dot disconnected"></span>
-            Connection
-        </button>
-    </div>
-
-    <!-- Welcome state (no connection) -->
-    <div id="welcome-state" class="welcome" style="display: none;">
-        <h2>Welcome to AI Data Analyst</h2>
-        <p>Connect your database to start asking questions about your data in plain English.</p>
-        <button onclick="openSettings()">Connect Database</button>
-    </div>
-
-    <!-- Data Browser -->
-    <div id="data-browser" class="data-browser" style="display: none;">
-        <div class="data-browser-header">
-            <h2>
-                <span>Your Data</span>
-                <span class="badge" id="table-count">0 tables</span>
-            </h2>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-secondary btn-small" onclick="showInsights()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none;">🔍 Insights</button>
-                <button class="btn-secondary btn-small" onclick="showTableStats()">📊 Stats</button>
-                <button class="btn-secondary btn-small" onclick="loadTables()">Refresh</button>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeSchemaModal()" style="width: 100%;">Close</button>
             </div>
         </div>
-        <div class="table-grid" id="table-grid"></div>
-        <div class="suggestions" id="suggestions-area">
-            <h4>Try asking:</h4>
-            <div class="suggestion-chips" id="suggestion-chips"></div>
-        </div>
     </div>
 
-    <div id="query-area" style="display: none;">
-        <div class="input-group">
-            <input type="text" id="question" placeholder="Ask a question about your data..." />
-            <button id="btn" onclick="ask()">Ask</button>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">✦</div>
+                <h1>Lumen<span>AI Data Analyst</span></h1>
+            </div>
+            <button class="btn btn-secondary connection-btn" onclick="openSettings()">
+                <span class="status-indicator" id="status-dot"></span>
+                <span>Connection</span>
+            </button>
+        </header>
+
+        <!-- Welcome State -->
+        <div id="welcome-state" class="welcome" style="display: none;">
+            <div class="welcome-icon">✦</div>
+            <h2>Welcome to Lumen</h2>
+            <p>Connect your database to start exploring your data with natural language queries.</p>
+            <button class="btn btn-primary" onclick="openSettings()">Connect Database</button>
         </div>
+
+        <!-- Data Browser -->
+        <div id="data-browser" class="data-section" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">
+                    <h2>Your Data</h2>
+                    <span class="badge" id="table-count">0 tables</span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="showInsights()">✦ Insights</button>
+                    <button class="btn btn-ghost" onclick="showTableStats()">Stats</button>
+                    <button class="btn btn-ghost" onclick="loadTables()">Refresh</button>
+                </div>
+            </div>
+            <div class="table-grid" id="table-grid"></div>
+            <div class="suggestions-section" id="suggestions-area">
+                <div class="suggestions-label">Try asking</div>
+                <div class="suggestion-chips" id="suggestion-chips"></div>
+            </div>
+        </div>
+
+        <!-- Query Section -->
+        <div id="query-area" class="query-section" style="display: none;">
+            <div class="query-input-wrapper">
+                <input type="text" class="query-input" id="question" placeholder="Ask anything about your data..." />
+                <button class="btn btn-primary query-btn" id="btn" onclick="ask()">Ask</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Analyzing your data...</span>
+        </div>
+
+        <div id="results"></div>
     </div>
-
-    <p id="loading">Analyzing your data...</p>
-
-    <div id="results"></div>
 
     <script>
         let chart = null;
         let currentTab = 'fields';
-        let schemaCache = {};
         let tablesData = [];
 
         function getDbUrl() {
@@ -680,10 +1081,8 @@
             currentTab = tab;
             document.getElementById('fields-tab').style.display = tab === 'fields' ? 'block' : 'none';
             document.getElementById('url-tab').style.display = tab === 'url' ? 'block' : 'none';
-            document.getElementById('tab-fields').style.borderBottomColor = tab === 'fields' ? '#000' : 'transparent';
-            document.getElementById('tab-fields').style.color = tab === 'fields' ? '#000' : '#666';
-            document.getElementById('tab-url').style.borderBottomColor = tab === 'url' ? '#000' : 'transparent';
-            document.getElementById('tab-url').style.color = tab === 'url' ? '#000' : '#666';
+            document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
         }
 
         function openSettings() {
@@ -737,15 +1136,14 @@
         }
 
         function updateStatus(connected) {
-            document.getElementById('status-dot').className = connected ? 'status-dot connected' : 'status-dot disconnected';
+            const dot = document.getElementById('status-dot');
+            dot.classList.toggle('connected', connected);
         }
 
-        // Friendly table name
         function friendlyName(name) {
             return name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
 
-        // Get icon for table
         function getTableIcon(name) {
             const n = name.toLowerCase();
             if (n.includes('user')) return '👤';
@@ -758,39 +1156,23 @@
             if (n.includes('metric') || n.includes('score')) return '📊';
             if (n.includes('job') || n.includes('task')) return '✅';
             if (n.includes('session') || n.includes('api')) return '🔑';
-            if (n.includes('notification') || n.includes('alert')) return '🔔';
-            if (n.includes('email') || n.includes('message')) return '✉️';
-            if (n.includes('intent') || n.includes('signal')) return '📡';
-            if (n.includes('persona')) return '🎭';
-            if (n.includes('ranking') || n.includes('score')) return '🏆';
             return '📁';
         }
 
-        // Generate suggestions based on tables
         function generateSuggestions(tables) {
             const suggestions = [];
             const t = tables.map(t => t.toLowerCase());
 
-            if (t.some(x => x.includes('user'))) {
-                suggestions.push('How many users do we have?');
-            }
+            if (t.some(x => x.includes('user'))) suggestions.push('How many users do we have?');
             if (t.some(x => x.includes('order') || x.includes('deal'))) {
-                suggestions.push('Show me recent deals');
+                suggestions.push('Show recent deals');
                 suggestions.push('What is our total revenue?');
             }
-            if (t.some(x => x.includes('company') || x.includes('companies'))) {
-                suggestions.push('How many companies are there?');
-                suggestions.push('Show top companies');
-            }
-            if (t.some(x => x.includes('contact'))) {
-                suggestions.push('List recent contacts');
-            }
-            if (t.some(x => x.includes('product'))) {
-                suggestions.push('Show all products');
-            }
+            if (t.some(x => x.includes('company'))) suggestions.push('How many companies are there?');
+            if (t.some(x => x.includes('contact'))) suggestions.push('List all contacts');
             if (suggestions.length === 0) {
                 suggestions.push('Show me a summary of the data');
-                suggestions.push('What tables have the most records?');
+                suggestions.push('Which tables have the most records?');
             }
             return suggestions.slice(0, 4);
         }
@@ -798,7 +1180,7 @@
         async function showInsights() {
             document.getElementById('insights-modal').classList.add('active');
             document.getElementById('health-score-value').textContent = '...';
-            document.getElementById('stats-grid').innerHTML = '<p>Analyzing your database...</p>';
+            document.getElementById('stats-grid').innerHTML = '<p style="color: var(--text-tertiary);">Analyzing...</p>';
             document.getElementById('relationships-list').innerHTML = '';
             document.getElementById('key-tables-list').innerHTML = '';
             document.getElementById('issues-list').innerHTML = '';
@@ -814,102 +1196,69 @@
                 });
                 const data = await res.json();
 
-                // Health Score
                 document.getElementById('health-score-value').textContent = data.health_score || 0;
 
-                // AI Summary
                 if (data.ai_summary) {
                     document.getElementById('ai-summary-section').innerHTML = data.ai_summary;
                     document.getElementById('ai-summary-section').style.display = 'block';
                 }
 
-                // Stats Grid
                 const summary = data.summary || {};
                 document.getElementById('stats-grid').innerHTML = `
-                    <div class="stat-card">
-                        <div class="value">${summary.total_tables || 0}</div>
-                        <div class="label">Total Tables</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="value">${summary.tables_with_data || 0}</div>
-                        <div class="label">With Data</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="value">${summary.total_relationships || 0}</div>
-                        <div class="label">Relationships</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="value">${summary.orphaned_tables || 0}</div>
-                        <div class="label">Standalone</div>
-                    </div>
+                    <div class="stat-card"><div class="value">${summary.total_tables || 0}</div><div class="label">Tables</div></div>
+                    <div class="stat-card"><div class="value">${summary.tables_with_data || 0}</div><div class="label">With Data</div></div>
+                    <div class="stat-card"><div class="value">${summary.total_relationships || 0}</div><div class="label">Relations</div></div>
+                    <div class="stat-card"><div class="value">${summary.orphaned_tables || 0}</div><div class="label">Standalone</div></div>
                 `;
 
-                // Relationships
                 const rels = data.relationships || [];
                 if (rels.length > 0) {
-                    document.getElementById('relationships-list').innerHTML = rels.slice(0, 10).map(r => `
+                    document.getElementById('relationships-list').innerHTML = rels.slice(0, 8).map(r => `
                         <div class="relationship-item">
                             <span>${friendlyName(r.from_table)}</span>
                             <span class="relationship-arrow">→</span>
                             <span>${friendlyName(r.to_table)}</span>
-                            <span style="color: #999; font-size: 12px; margin-left: auto;">via ${r.from_column}</span>
                         </div>
                     `).join('');
-                    if (rels.length > 10) {
-                        document.getElementById('relationships-list').innerHTML += `<p style="color: #666; font-size: 13px;">+ ${rels.length - 10} more relationships</p>`;
-                    }
                 } else {
-                    document.getElementById('relationships-list').innerHTML = '<p style="color: #999;">No foreign key relationships found</p>';
+                    document.getElementById('relationships-list').innerHTML = '<p style="color: var(--text-tertiary);">No relationships found</p>';
                 }
 
-                // Key Tables
                 const keyTables = data.key_tables || [];
                 if (keyTables.length > 0) {
                     document.getElementById('key-tables-list').innerHTML = keyTables.slice(0, 5).map(t => `
                         <div class="key-table-item">
-                            <span>📁 ${friendlyName(t.table)}</span>
-                            <span class="refs">${t.references} references</span>
+                            <span>${friendlyName(t.table)}</span>
+                            <span class="refs-badge">${t.references} refs</span>
                         </div>
                     `).join('');
                 } else {
-                    document.getElementById('key-tables-list').innerHTML = '<p style="color: #999;">No highly connected tables found</p>';
+                    document.getElementById('key-tables-list').innerHTML = '<p style="color: var(--text-tertiary);">No key tables found</p>';
                 }
 
-                // Issues
                 const quality = data.data_quality || [];
                 const issues = quality.filter(q => q.issue);
                 if (issues.length > 0) {
-                    document.getElementById('issues-list').innerHTML = issues.slice(0, 10).map(q => {
-                        let badgeClass = 'empty';
-                        let badgeText = 'Empty';
-                        if (q.issue === 'high_nulls') {
-                            badgeClass = 'nulls';
-                            badgeText = 'High NULLs';
-                        } else if (q.issue === 'no_primary_key') {
-                            badgeClass = 'no-pk';
-                            badgeText = 'No Primary Key';
-                        }
-                        return `
-                            <div class="issue-item ${q.issue === 'high_nulls' ? 'warning' : ''}">
-                                <span>${friendlyName(q.table)}</span>
-                                <span class="issue-badge ${badgeClass}">${badgeText}</span>
-                            </div>
-                        `;
+                    document.getElementById('issues-list').innerHTML = issues.slice(0, 8).map(q => {
+                        let badgeClass = 'empty', badgeText = 'Empty';
+                        if (q.issue === 'high_nulls') { badgeClass = 'nulls'; badgeText = 'High NULLs'; }
+                        else if (q.issue === 'no_primary_key') { badgeClass = 'no-pk'; badgeText = 'No PK'; }
+                        return `<div class="issue-item ${q.issue === 'high_nulls' ? 'warning' : ''}">
+                            <span>${friendlyName(q.table)}</span>
+                            <span class="issue-badge ${badgeClass}">${badgeText}</span>
+                        </div>`;
                     }).join('');
                 } else {
-                    document.getElementById('issues-list').innerHTML = '<p style="color: #22c55e;">✓ No major issues found</p>';
+                    document.getElementById('issues-list').innerHTML = '<p style="color: var(--success);">✓ No major issues found</p>';
                 }
 
-                // Suggested Questions
                 const suggestions = data.suggested_questions || [];
-                if (suggestions.length > 0) {
-                    document.getElementById('insight-suggestions').innerHTML = suggestions.map(s => `
-                        <button class="suggestion-chip" onclick="askFromInsights('${s.question.replace(/'/g, "\\'")}')">${s.question}</button>
-                    `).join('');
-                }
+                document.getElementById('insight-suggestions').innerHTML = suggestions.map(s => `
+                    <button class="suggestion-chip" onclick="askFromInsights('${s.question.replace(/'/g, "\\'")}')">${s.question}</button>
+                `).join('');
 
             } catch (e) {
-                document.getElementById('stats-grid').innerHTML = `<p style="color: #c00;">Failed to load insights: ${e.message}</p>`;
+                document.getElementById('stats-grid').innerHTML = `<p class="error">Failed to load insights</p>`;
             }
         }
 
@@ -925,7 +1274,7 @@
 
         async function showTableStats() {
             document.getElementById('stats-modal').classList.add('active');
-            document.getElementById('stats-content').innerHTML = '<p>Loading stats...</p>';
+            document.getElementById('stats-content').innerHTML = '<p style="color: var(--text-tertiary);">Loading...</p>';
 
             const dbUrl = getDbUrl();
             try {
@@ -938,37 +1287,31 @@
 
                 if (data.stats) {
                     const empty = data.stats.filter(s => s.rows === 0);
-                    const withData = data.stats.filter(s => s.rows > 0);
+                    const withData = data.stats.filter(s => s.rows > 0).sort((a, b) => b.rows - a.rows);
 
                     let html = '';
-
-                    if (empty.length > 0) {
-                        html += `<h4 style="margin: 0 0 10px 0; color: #666;">Empty Tables (${empty.length})</h4>`;
-                        html += '<div style="margin-bottom: 20px;">';
-                        empty.forEach(s => {
-                            html += `<div style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
-                                <span>${friendlyName(s.table)}</span>
-                                <span style="color: #999;">0 rows</span>
-                            </div>`;
-                        });
-                        html += '</div>';
-                    }
-
                     if (withData.length > 0) {
-                        html += `<h4 style="margin: 0 0 10px 0; color: #666;">Tables with Data (${withData.length})</h4>`;
-                        withData.sort((a, b) => b.rows - a.rows);
+                        html += '<p style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px;">TABLES WITH DATA</p>';
                         withData.forEach(s => {
-                            html += `<div style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                            html += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
                                 <span>${friendlyName(s.table)}</span>
-                                <span style="color: #22c55e; font-weight: 500;">${s.rows.toLocaleString()} rows</span>
+                                <span style="color: var(--success);">${s.rows.toLocaleString()}</span>
                             </div>`;
                         });
                     }
-
+                    if (empty.length > 0) {
+                        html += '<p style="font-size: 12px; color: var(--text-tertiary); margin: 20px 0 12px;">EMPTY TABLES</p>';
+                        empty.forEach(s => {
+                            html += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">${friendlyName(s.table)}</span>
+                                <span style="color: var(--text-tertiary);">0</span>
+                            </div>`;
+                        });
+                    }
                     document.getElementById('stats-content').innerHTML = html;
                 }
             } catch (e) {
-                document.getElementById('stats-content').innerHTML = '<p style="color: #c00;">Failed to load stats</p>';
+                document.getElementById('stats-content').innerHTML = '<p class="error">Failed to load stats</p>';
             }
         }
 
@@ -977,14 +1320,11 @@
         }
 
         async function showTableSchema(tableName) {
-            const dbUrl = getDbUrl();
-
-            // Generate description
-            const desc = `View and query data from the ${friendlyName(tableName)} table.`;
             document.getElementById('schema-table-name').textContent = friendlyName(tableName);
-            document.getElementById('schema-table-desc').textContent = desc;
+            document.getElementById('schema-table-desc').textContent = `Explore the ${friendlyName(tableName)} table`;
+            document.getElementById('schema-modal').classList.add('active');
 
-            // Fetch columns
+            const dbUrl = getDbUrl();
             try {
                 const res = await fetch('/api/schema-details', {
                     method: 'POST',
@@ -993,35 +1333,25 @@
                 });
                 const data = await res.json();
 
-                let html = '';
-                (data.columns || []).forEach(col => {
+                document.getElementById('schema-columns').innerHTML = (data.columns || []).map(col => {
                     const friendlyType = col.type.replace('character varying', 'text')
-                        .replace('timestamp without time zone', 'date/time')
-                        .replace('timestamp with time zone', 'date/time')
+                        .replace('timestamp without time zone', 'datetime')
+                        .replace('timestamp with time zone', 'datetime')
                         .replace('integer', 'number')
                         .replace('bigint', 'number')
                         .replace('numeric', 'number')
                         .replace('boolean', 'yes/no');
-                    html += `<div class="column-item">
+                    return `<div class="column-item">
                         <span class="column-name">${friendlyName(col.name)}</span>
                         <span class="column-type">${friendlyType}</span>
                     </div>`;
-                });
-                document.getElementById('schema-columns').innerHTML = html || '<p>No columns found</p>';
+                }).join('');
 
-                // Suggestions for this table
-                const suggHtml = [
-                    `How many records in ${friendlyName(tableName)}?`,
-                    `Show me the latest ${friendlyName(tableName)} entries`,
-                    `Summarize ${friendlyName(tableName)} data`
+                document.getElementById('schema-suggestions').innerHTML = [
+                    `How many ${friendlyName(tableName)} records?`,
+                    `Show latest ${friendlyName(tableName)}`
                 ].map(s => `<button class="suggestion-chip" onclick="askQuestion('${s}')">${s}</button>`).join('');
-                document.getElementById('schema-suggestions').innerHTML = suggHtml;
-
-            } catch (e) {
-                document.getElementById('schema-columns').innerHTML = '<p>Could not load columns</p>';
-            }
-
-            document.getElementById('schema-modal').classList.add('active');
+            } catch (e) {}
         }
 
         function closeSchemaModal() {
@@ -1029,8 +1359,8 @@
         }
 
         function askQuestion(q) {
-            document.getElementById('question').value = q;
             closeSchemaModal();
+            document.getElementById('question').value = q;
             ask();
         }
 
@@ -1059,34 +1389,24 @@
                     tablesData = data.tables;
                     document.getElementById('table-count').textContent = `${data.tables.length} tables`;
 
-                    // Render table chips
-                    let html = '';
-                    data.tables.forEach(t => {
-                        html += `<div class="table-chip" onclick="showTableSchema('${t}')">
+                    document.getElementById('table-grid').innerHTML = data.tables.map(t => `
+                        <div class="table-chip" onclick="showTableSchema('${t}')">
                             <span class="icon">${getTableIcon(t)}</span>
                             <span class="name">${friendlyName(t)}</span>
-                        </div>`;
-                    });
-                    document.getElementById('table-grid').innerHTML = html;
+                        </div>
+                    `).join('');
 
-                    // Generate suggestions
                     const suggestions = generateSuggestions(data.tables);
-                    document.getElementById('suggestion-chips').innerHTML = suggestions
-                        .map(s => `<button class="suggestion-chip" onclick="askQuestion('${s}')">${s}</button>`)
-                        .join('');
+                    document.getElementById('suggestion-chips').innerHTML = suggestions.map(s =>
+                        `<button class="suggestion-chip" onclick="askQuestion('${s}')">${s}</button>`
+                    ).join('');
 
-                    document.getElementById('data-browser').style.display = 'block';
-                    document.getElementById('query-area').style.display = 'block';
-                    updateStatus(true);
-                } else {
-                    document.getElementById('data-browser').innerHTML = '<p>No tables found in your database.</p>';
                     document.getElementById('data-browser').style.display = 'block';
                     document.getElementById('query-area').style.display = 'block';
                     updateStatus(true);
                 }
             } catch (e) {
                 document.getElementById('welcome-state').style.display = 'block';
-                document.getElementById('data-browser').style.display = 'none';
                 updateStatus(false);
             }
         }
@@ -1096,14 +1416,11 @@
             if (!q) return;
 
             const dbUrl = getDbUrl();
-            if (!dbUrl) {
-                openSettings();
-                return;
-            }
+            if (!dbUrl) { openSettings(); return; }
 
             const btn = document.getElementById('btn');
             btn.disabled = true;
-            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').classList.add('active');
             document.getElementById('results').innerHTML = '';
             if (chart) { chart.destroy(); chart = null; }
 
@@ -1121,68 +1438,60 @@
                     return;
                 }
 
-                let html = '';
-
-                // Results Table (prominent)
-                html += `<div class="card">
-                    <h3>Results <span style="font-weight: normal; color: #999;">(${data.rows.length} rows)</span></h3>
-                    <div style="overflow-x: auto;"><table><tr>`;
-                data.columns.forEach(c => html += `<th>${escapeHtml(friendlyName(c))}</th>`);
-                html += '</tr>';
-                data.rows.slice(0, 100).forEach(row => {
-                    html += '<tr>' + row.map(v => `<td>${escapeHtml(String(v ?? ''))}</td>`).join('') + '</tr>';
-                });
-                html += '</table></div></div>';
-
-                // Chart
-                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 100) {
-                    html += `<div class="card"><h3>Visualization</h3><div class="chart-container"><canvas id="chart"></canvas></div></div>`;
-                }
-
-                // SQL (collapsed by default)
-                html += `<div class="card">
-                    <span class="sql-toggle" onclick="toggleSql()">
-                        <span id="sql-arrow">▶</span> Show SQL Query
-                    </span>
-                    <pre id="sql-block" class="sql-hidden">${escapeHtml(data.sql)}</pre>
+                let html = `<div class="results-card">
+                    <div class="results-header">
+                        <h3>Results</h3>
+                        <span class="count">${data.rows.length} rows</span>
+                    </div>
+                    <div class="results-body">
+                        <table><tr>${data.columns.map(c => `<th>${friendlyName(c)}</th>`).join('')}</tr>
+                        ${data.rows.slice(0, 100).map(row => `<tr>${row.map(v => `<td>${escapeHtml(String(v ?? ''))}</td>`).join('')}</tr>`).join('')}
+                        </table>
+                    </div>
+                    <div class="sql-section">
+                        <div class="sql-toggle" onclick="toggleSql()">
+                            <span id="sql-arrow">▶</span> View SQL
+                        </div>
+                        <div class="sql-content" id="sql-content">
+                            <pre>${escapeHtml(data.sql)}</pre>
+                        </div>
+                    </div>
                 </div>`;
+
+                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 100) {
+                    html += `<div class="results-card"><div class="results-header"><h3>Visualization</h3></div><div class="chart-container"><canvas id="chart"></canvas></div></div>`;
+                }
 
                 document.getElementById('results').innerHTML = html;
 
-                // Render chart
                 if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 100) {
-                    let labelCol = 0;
                     let valueCol = -1;
-
                     for (let i = 1; i < data.columns.length; i++) {
-                        const testVal = parseFloat(data.rows[0][i]);
-                        if (!isNaN(testVal)) {
-                            valueCol = i;
-                            break;
-                        }
+                        if (!isNaN(parseFloat(data.rows[0][i]))) { valueCol = i; break; }
                     }
-
                     if (valueCol === -1) valueCol = 1;
-
-                    const labels = data.rows.map(r => String(r[labelCol]));
-                    const values = data.rows.map(r => parseFloat(r[valueCol]) || 0);
 
                     const ctx = document.getElementById('chart');
                     if (ctx) {
                         chart = new Chart(ctx, {
                             type: 'bar',
                             data: {
-                                labels: labels,
+                                labels: data.rows.map(r => String(r[0])),
                                 datasets: [{
                                     label: friendlyName(data.columns[valueCol]),
-                                    data: values,
-                                    backgroundColor: 'rgba(102, 126, 234, 0.8)'
+                                    data: data.rows.map(r => parseFloat(r[valueCol]) || 0),
+                                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                    borderRadius: 6
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: true } }
+                                plugins: { legend: { labels: { color: '#fff' } } },
+                                scales: {
+                                    x: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                                    y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                                }
                             }
                         });
                     }
@@ -1191,20 +1500,15 @@
                 document.getElementById('results').innerHTML = `<div class="error">Network error: ${e.message}</div>`;
             } finally {
                 btn.disabled = false;
-                document.getElementById('loading').style.display = 'none';
+                document.getElementById('loading').classList.remove('active');
             }
         }
 
         function toggleSql() {
-            const block = document.getElementById('sql-block');
+            const content = document.getElementById('sql-content');
             const arrow = document.getElementById('sql-arrow');
-            if (block.classList.contains('sql-hidden')) {
-                block.classList.remove('sql-hidden');
-                arrow.textContent = '▼';
-            } else {
-                block.classList.add('sql-hidden');
-                arrow.textContent = '▶';
-            }
+            content.classList.toggle('active');
+            arrow.textContent = content.classList.contains('active') ? '▼' : '▶';
         }
 
         function escapeHtml(text) {
@@ -1217,20 +1521,12 @@
             if (e.key === 'Enter') ask();
         });
 
-        document.getElementById('settings-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'settings-modal') closeSettings();
-        });
-
-        document.getElementById('schema-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'schema-modal') closeSchemaModal();
-        });
-
-        document.getElementById('stats-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'stats-modal') closeStatsModal();
-        });
-
-        document.getElementById('insights-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'insights-modal') closeInsightsModal();
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', e => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
         });
 
         loadTables();
