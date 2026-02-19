@@ -163,6 +163,57 @@
             gap: 8px;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            padding: 6px;
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .nav-tab svg {
+            opacity: 0.8;
+        }
+
+        .nav-tab.active svg {
+            opacity: 1;
+        }
+
         .status-indicator {
             width: 8px;
             height: 8px;
@@ -838,6 +889,265 @@
             color: white;
         }
 
+        /* Code Analyzer Page Styles */
+        .page-content {
+            min-height: 400px;
+        }
+
+        .code-input-form {
+            max-width: 500px;
+            margin: 32px auto 0;
+            text-align: left;
+        }
+
+        .code-input-form .form-group {
+            margin-bottom: 16px;
+        }
+
+        .code-input-form .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .optional {
+            color: var(--text-tertiary);
+            font-weight: 400;
+        }
+
+        .code-progress {
+            max-width: 600px;
+            margin: 60px auto;
+            text-align: center;
+        }
+
+        .progress-header {
+            margin-bottom: 24px;
+        }
+
+        .progress-header h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .progress-header span {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-details {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .code-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: 600;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .summary-card .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .summary-card.warning .value {
+            background: linear-gradient(135deg, var(--warning) 0%, var(--error) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .findings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .findings-section h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .findings-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .finding-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .finding-item:hover {
+            border-color: var(--accent);
+        }
+
+        .finding-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .finding-icon.function {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+        }
+
+        .finding-icon.import {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .finding-icon.variable {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .finding-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .finding-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .finding-name {
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 14px;
+        }
+
+        .finding-type {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+        }
+
+        .finding-location {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-bottom: 6px;
+        }
+
+        .finding-reason {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .confidence-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .confidence-badge.high {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .confidence-badge.medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .confidence-badge.low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .no-findings {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-tertiary);
+        }
+
+        .no-findings svg {
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
         .relationship-item {
             display: flex;
             align-items: center;
@@ -1121,24 +1431,47 @@
         <header class="header">
             <div class="logo">
                 <div class="logo-icon">✦</div>
-                <h1>Lumen<span>AI Data Analyst</span></h1>
+                <h1>Lumen<span>AI Toolkit</span></h1>
             </div>
-            <button class="btn btn-secondary connection-btn" onclick="openSettings()">
-                <span class="status-indicator" id="status-dot"></span>
-                <span>Connection</span>
-            </button>
+            <div class="header-right">
+                <button class="btn btn-secondary connection-btn" onclick="openSettings()" id="db-connection-btn">
+                    <span class="status-indicator" id="status-dot"></span>
+                    <span>Connection</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Welcome State -->
-        <div id="welcome-state" class="welcome" style="display: none;">
-            <div class="welcome-icon">✦</div>
-            <h2>Welcome to Lumen</h2>
-            <p>Connect your database to start exploring your data with natural language queries.</p>
-            <button class="btn btn-primary" onclick="openSettings()">Connect Database</button>
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchPage('database')" id="tab-database">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                Database Analyzer
+            </button>
+            <button class="nav-tab" onclick="switchPage('code')" id="tab-code">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                Code Analyzer
+            </button>
         </div>
 
-        <!-- Data Browser -->
-        <div id="data-browser" class="data-section" style="display: none;">
+        <!-- DATABASE PAGE -->
+        <div id="page-database" class="page-content">
+            <!-- Welcome State -->
+            <div id="welcome-state" class="welcome" style="display: none;">
+                <div class="welcome-icon">✦</div>
+                <h2>Welcome to Lumen</h2>
+                <p>Connect your database to start exploring your data with natural language queries.</p>
+                <button class="btn btn-primary" onclick="openSettings()">Connect Database</button>
+            </div>
+
+            <!-- Data Browser -->
+            <div id="data-browser" class="data-section" style="display: none;">
             <div class="section-header">
                 <div class="section-title">
                     <h2>Your Data</h2>
@@ -1165,18 +1498,382 @@
             </div>
         </div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <span>Analyzing your data...</span>
-        </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>Analyzing your data...</span>
+            </div>
 
-        <div id="results"></div>
+            <div id="results"></div>
+        </div>
+        <!-- END DATABASE PAGE -->
+
+        <!-- CODE ANALYZER PAGE -->
+        <div id="page-code" class="page-content" style="display: none;">
+            <!-- Code Welcome State -->
+            <div id="code-welcome" class="welcome">
+                <div class="welcome-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <h2>Dead Code Detector</h2>
+                <p>Analyze your GitHub repository to find unused functions, imports, and variables.</p>
+
+                <div class="code-input-form">
+                    <div class="form-group">
+                        <label>GitHub Repository URL</label>
+                        <input type="text" class="form-input" id="github-url" placeholder="https://github.com/username/repo" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Branch <span class="optional">(optional)</span></label>
+                            <input type="text" class="form-input" id="github-branch" placeholder="main" />
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>GitHub Token <span class="optional">(optional)</span></label>
+                            <input type="password" class="form-input" id="github-token" placeholder="ghp_xxxxx" />
+                        </div>
+                    </div>
+                    <div class="security-notice" style="margin-bottom: 16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>Your GitHub token is stored locally and only used to access private repos and increase rate limits. Public repos work without a token.</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="analyzeRepo()" style="width: 100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="M21 21l-4.35-4.35"></path>
+                        </svg>
+                        Analyze Repository
+                    </button>
+                </div>
+            </div>
+
+            <!-- Code Analysis Progress -->
+            <div id="code-progress" class="code-progress" style="display: none;">
+                <div class="progress-header">
+                    <h3>Analyzing Repository</h3>
+                    <span id="progress-status">Fetching files...</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="analysis-progress"></div>
+                </div>
+                <div class="progress-details" id="progress-details"></div>
+            </div>
+
+            <!-- Code Results -->
+            <div id="code-results" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2 id="repo-name">Repository</h2>
+                        <span class="badge" id="issues-count">0 issues</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="generateCodePrompt()">✦ Get Fix Prompt</button>
+                        <button class="btn btn-ghost" onclick="resetCodeAnalysis()">New Analysis</button>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="code-summary" id="code-summary"></div>
+
+                <!-- Findings List -->
+                <div class="findings-section">
+                    <h3>Findings</h3>
+                    <div class="findings-filters">
+                        <button class="filter-btn active" onclick="filterFindings('all')">All</button>
+                        <button class="filter-btn" onclick="filterFindings('unused_function')">Functions</button>
+                        <button class="filter-btn" onclick="filterFindings('unused_import')">Imports</button>
+                        <button class="filter-btn" onclick="filterFindings('unused_variable')">Variables</button>
+                    </div>
+                    <div id="findings-list"></div>
+                </div>
+            </div>
+        </div>
+        <!-- END CODE ANALYZER PAGE -->
+
+        <!-- Code Prompt Modal -->
+        <div id="code-prompt-modal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Claude Code Prompt</h2>
+                    <p>Copy this prompt to fix the dead code issues</p>
+                </div>
+                <div class="modal-body">
+                    <div class="claude-prompt-container">
+                        <pre id="code-fix-prompt"></pre>
+                        <button class="copy-prompt-btn" onclick="copyCodePrompt()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeCodePromptModal()" style="width: 100%;">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         let chart = null;
         let currentTab = 'fields';
         let tablesData = [];
+        let currentPage = 'database';
+        let codeFindings = [];
+        let currentFilter = 'all';
+
+        // Page Navigation
+        function switchPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById('page-' + page).style.display = 'block';
+            document.getElementById('tab-' + page).classList.add('active');
+
+            // Show/hide connection button based on page
+            document.getElementById('db-connection-btn').style.display = page === 'database' ? 'flex' : 'none';
+        }
+
+        // GitHub Token Management
+        function getGitHubToken() {
+            return localStorage.getItem('github_token') || '';
+        }
+
+        function saveGitHubToken(token) {
+            if (token) {
+                localStorage.setItem('github_token', token);
+            }
+        }
+
+        // Code Analysis Functions
+        async function analyzeRepo() {
+            const urlInput = document.getElementById('github-url').value.trim();
+            const branch = document.getElementById('github-branch').value.trim() || 'main';
+            const token = document.getElementById('github-token').value.trim();
+
+            if (!urlInput) {
+                alert('Please enter a GitHub repository URL');
+                return;
+            }
+
+            // Parse GitHub URL
+            const match = urlInput.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+            if (!match) {
+                alert('Invalid GitHub URL. Please use format: https://github.com/username/repo');
+                return;
+            }
+
+            const owner = match[1];
+            const repo = match[2].replace(/\.git$/, '');
+
+            // Save token if provided
+            if (token) saveGitHubToken(token);
+
+            // Show progress
+            document.getElementById('code-welcome').style.display = 'none';
+            document.getElementById('code-progress').style.display = 'block';
+            document.getElementById('code-results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/deadcode/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        owner,
+                        repo,
+                        branch,
+                        token: token || getGitHubToken()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Store findings globally
+                codeFindings = data.findings || [];
+
+                // Show results
+                displayCodeResults(data);
+
+            } catch (error) {
+                alert('Analysis failed: ' + error.message);
+                resetCodeAnalysis();
+            }
+        }
+
+        function updateProgress(percent, status, details) {
+            document.getElementById('analysis-progress').style.width = percent + '%';
+            if (status) document.getElementById('progress-status').textContent = status;
+            if (details) document.getElementById('progress-details').textContent = details;
+        }
+
+        function displayCodeResults(data) {
+            document.getElementById('code-progress').style.display = 'none';
+            document.getElementById('code-results').style.display = 'block';
+
+            // Set repo name
+            document.getElementById('repo-name').textContent = data.repository?.name || 'Repository';
+            document.getElementById('issues-count').textContent = (data.findings?.length || 0) + ' issues';
+
+            // Summary cards
+            const summary = data.summary || {};
+            document.getElementById('code-summary').innerHTML = `
+                <div class="summary-card">
+                    <div class="value">${summary.files_analyzed || 0}</div>
+                    <div class="label">Files Analyzed</div>
+                </div>
+                <div class="summary-card">
+                    <div class="value">${summary.total_issues || 0}</div>
+                    <div class="label">Total Issues</div>
+                </div>
+                <div class="summary-card ${summary.unused_functions > 0 ? 'warning' : ''}">
+                    <div class="value">${summary.unused_functions || 0}</div>
+                    <div class="label">Unused Functions</div>
+                </div>
+                <div class="summary-card">
+                    <div class="value">${summary.unused_imports || 0}</div>
+                    <div class="label">Unused Imports</div>
+                </div>
+                <div class="summary-card">
+                    <div class="value">${summary.unused_variables || 0}</div>
+                    <div class="label">Unused Variables</div>
+                </div>
+            `;
+
+            // Display findings
+            filterFindings('all');
+        }
+
+        function filterFindings(type) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const filtered = type === 'all'
+                ? codeFindings
+                : codeFindings.filter(f => f.type === type);
+
+            renderFindings(filtered);
+        }
+
+        function renderFindings(findings) {
+            const container = document.getElementById('findings-list');
+
+            if (!findings || findings.length === 0) {
+                container.innerHTML = `
+                    <div class="no-findings">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <p>No issues found${currentFilter !== 'all' ? ' in this category' : ''}!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = findings.map(f => {
+                const iconClass = f.type.includes('function') ? 'function' :
+                                  f.type.includes('import') ? 'import' : 'variable';
+                const icon = f.type.includes('function') ? 'ƒ' :
+                             f.type.includes('import') ? '📦' : 'x';
+
+                return `
+                    <div class="finding-item" data-type="${f.type}">
+                        <div class="finding-icon ${iconClass}">${icon}</div>
+                        <div class="finding-content">
+                            <div class="finding-header">
+                                <span class="finding-name">${escapeHtml(f.name)}</span>
+                                <span class="finding-type">${f.type.replace('unused_', '')}</span>
+                                <span class="confidence-badge ${f.confidence}">${f.confidence}</span>
+                            </div>
+                            <div class="finding-location">${escapeHtml(f.file)}:${f.line}</div>
+                            <div class="finding-reason">${escapeHtml(f.reason)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function resetCodeAnalysis() {
+            document.getElementById('code-welcome').style.display = 'block';
+            document.getElementById('code-progress').style.display = 'none';
+            document.getElementById('code-results').style.display = 'none';
+            codeFindings = [];
+        }
+
+        function generateCodePrompt() {
+            if (codeFindings.length === 0) {
+                alert('No findings to generate a prompt for.');
+                return;
+            }
+
+            const repoName = document.getElementById('repo-name').textContent;
+            let prompt = `I need help cleaning up dead code in my repository "${repoName}".\n\n`;
+            prompt += `## Issues Found (${codeFindings.length} total)\n\n`;
+
+            // Group by type
+            const byType = {};
+            codeFindings.forEach(f => {
+                if (!byType[f.type]) byType[f.type] = [];
+                byType[f.type].push(f);
+            });
+
+            for (const [type, items] of Object.entries(byType)) {
+                const typeName = type.replace('unused_', '').charAt(0).toUpperCase() + type.replace('unused_', '').slice(1) + 's';
+                prompt += `### Unused ${typeName} (${items.length})\n`;
+                items.slice(0, 10).forEach(f => {
+                    prompt += `- \`${f.name}\` in ${f.file}:${f.line}\n`;
+                });
+                if (items.length > 10) {
+                    prompt += `- ... and ${items.length - 10} more\n`;
+                }
+                prompt += '\n';
+            }
+
+            prompt += `## Request\n`;
+            prompt += `Please help me:\n`;
+            prompt += `1. Review these findings and confirm which ones are safe to remove\n`;
+            prompt += `2. Check if any of these are used dynamically (via reflection, string imports, etc.)\n`;
+            prompt += `3. Provide the code changes needed to remove the confirmed dead code\n`;
+            prompt += `4. Suggest any additional cleanup that might be beneficial\n`;
+
+            document.getElementById('code-fix-prompt').textContent = prompt;
+            document.getElementById('code-prompt-modal').classList.add('active');
+        }
+
+        function copyCodePrompt() {
+            const content = document.getElementById('code-fix-prompt').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const btn = document.querySelector('#code-prompt-modal .copy-prompt-btn');
+                btn.classList.add('copied');
+                btn.querySelector('span').textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.querySelector('span').textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function closeCodePromptModal() {
+            document.getElementById('code-prompt-modal').classList.remove('active');
+        }
 
         function getDbUrl() {
             return localStorage.getItem('db_url') || '';

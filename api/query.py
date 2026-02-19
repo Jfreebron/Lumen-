@@ -7,6 +7,9 @@ from typing import Optional, List, Dict, Any
 import psycopg2
 import os
 import re
+import ast
+import requests
+import base64
 from collections import defaultdict
 
 app = FastAPI()
@@ -545,3 +548,391 @@ Keep it simple and non-technical. No bullet points."""
     )
 
     return response.choices[0].message.content.strip()
+
+
+# ============== DEAD CODE ANALYZER ==============
+
+class DeadCodeRequest(BaseModel):
+    owner: str
+    repo: str
+    branch: str = "main"
+    token: Optional[str] = None
+
+
+def get_github_headers(token: Optional[str] = None) -> Dict[str, str]:
+    """Get headers for GitHub API requests"""
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Lumen-Code-Analyzer"
+    }
+    if token:
+        headers["Authorization"] = f"token {token}"
+    return headers
+
+
+def fetch_repo_files(owner: str, repo: str, branch: str, token: Optional[str] = None) -> List[Dict]:
+    """Fetch list of files from a GitHub repository"""
+    headers = get_github_headers(token)
+
+    # Get the tree recursively
+    url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1"
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+        raise HTTPException(404, "Repository or branch not found. Check the URL or make sure you have access.")
+    elif response.status_code == 403:
+        raise HTTPException(403, "Rate limited. Please provide a GitHub token for higher limits.")
+    elif response.status_code != 200:
+        raise HTTPException(response.status_code, f"GitHub API error: {response.text}")
+
+    data = response.json()
+    files = []
+
+    # Filter for code files we can analyze
+    analyzable_extensions = {'.py', '.js', '.ts', '.jsx', '.tsx'}
+    skip_patterns = ['node_modules/', 'venv/', '.git/', '__pycache__/', 'dist/', 'build/', '.next/', 'vendor/']
+
+    for item in data.get("tree", []):
+        if item["type"] != "blob":
+            continue
+
+        path = item["path"]
+
+        # Skip unwanted directories
+        if any(skip in path for skip in skip_patterns):
+            continue
+
+        # Check extension
+        ext = os.path.splitext(path)[1].lower()
+        if ext in analyzable_extensions:
+            files.append({
+                "path": path,
+                "sha": item["sha"],
+                "size": item.get("size", 0),
+                "language": "python" if ext == ".py" else "javascript"
+            })
+
+    return files
+
+
+def fetch_file_content(owner: str, repo: str, sha: str, token: Optional[str] = None) -> str:
+    """Fetch content of a specific file from GitHub"""
+    headers = get_github_headers(token)
+    url = f"https://api.github.com/repos/{owner}/{repo}/git/blobs/{sha}"
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return ""
+
+    data = response.json()
+    content = data.get("content", "")
+    encoding = data.get("encoding", "base64")
+
+    if encoding == "base64":
+        try:
+            return base64.b64decode(content).decode("utf-8", errors="ignore")
+        except:
+            return ""
+    return content
+
+
+def analyze_python_code(content: str, filepath: str) -> List[Dict]:
+    """Analyze Python code for dead code patterns"""
+    findings = []
+
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return findings
+
+    # Collect all definitions
+    definitions = []
+    imports = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            # Skip private/magic methods
+            if not node.name.startswith('_'):
+                definitions.append({
+                    "type": "function",
+                    "name": node.name,
+                    "line": node.lineno
+                })
+        elif isinstance(node, ast.ClassDef):
+            definitions.append({
+                "type": "class",
+                "name": node.name,
+                "line": node.lineno
+            })
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                name = alias.asname if alias.asname else alias.name
+                imports.append({
+                    "name": name,
+                    "module": alias.name,
+                    "line": node.lineno
+                })
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                name = alias.asname if alias.asname else alias.name
+                imports.append({
+                    "name": name,
+                    "module": f"{node.module}.{alias.name}" if node.module else alias.name,
+                    "line": node.lineno
+                })
+
+    # Check for unused definitions (simple heuristic: count occurrences in code)
+    for defn in definitions:
+        # Count occurrences (excluding the definition itself)
+        pattern = r'\b' + re.escape(defn["name"]) + r'\b'
+        matches = list(re.finditer(pattern, content))
+
+        # If only appears once (the definition), it might be unused
+        if len(matches) <= 1:
+            findings.append({
+                "type": f"unused_{defn['type']}",
+                "name": defn["name"],
+                "file": filepath,
+                "line": defn["line"],
+                "confidence": "medium",
+                "reason": f"Function '{defn['name']}' appears to have no calls within this file"
+            })
+
+    # Check for unused imports
+    for imp in imports:
+        pattern = r'\b' + re.escape(imp["name"]) + r'\b'
+        matches = list(re.finditer(pattern, content))
+
+        # Import statement is one match, so if only 1 match, it's unused
+        if len(matches) <= 1:
+            findings.append({
+                "type": "unused_import",
+                "name": imp["name"],
+                "file": filepath,
+                "line": imp["line"],
+                "confidence": "high",
+                "reason": f"Import '{imp['name']}' is never used in this file"
+            })
+
+    return findings
+
+
+def analyze_javascript_code(content: str, filepath: str) -> List[Dict]:
+    """Analyze JavaScript/TypeScript code for dead code patterns"""
+    findings = []
+    lines = content.split('\n')
+
+    # Patterns for function definitions
+    function_patterns = [
+        r'function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(',  # function declarations
+        r'const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s*)?\(',  # arrow functions
+        r'const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s*)?function',  # function expressions
+        r'(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)',  # exported functions
+    ]
+
+    # Patterns for imports
+    import_patterns = [
+        r'import\s+{([^}]+)}\s+from',  # named imports
+        r'import\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s+from',  # default imports
+        r'import\s+\*\s+as\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s+from',  # namespace imports
+    ]
+
+    # Find all function definitions
+    functions = []
+    for i, line in enumerate(lines, 1):
+        for pattern in function_patterns:
+            match = re.search(pattern, line)
+            if match:
+                name = match.group(1)
+                # Skip common patterns that are typically used
+                if name not in ['render', 'constructor', 'componentDidMount', 'useEffect', 'useState']:
+                    functions.append({"name": name, "line": i})
+
+    # Find all imports
+    imports = []
+    for i, line in enumerate(lines, 1):
+        for pattern in import_patterns:
+            match = re.search(pattern, line)
+            if match:
+                # Handle named imports (comma-separated)
+                names_str = match.group(1)
+                if ',' in names_str or '{' not in line:
+                    for name in re.findall(r'([a-zA-Z_$][a-zA-Z0-9_$]*)', names_str):
+                        if name not in ['as', 'from']:
+                            imports.append({"name": name, "line": i})
+                else:
+                    imports.append({"name": names_str.strip(), "line": i})
+
+    # Check for unused functions
+    for func in functions:
+        pattern = r'\b' + re.escape(func["name"]) + r'\b'
+        matches = list(re.finditer(pattern, content))
+
+        if len(matches) <= 1:
+            findings.append({
+                "type": "unused_function",
+                "name": func["name"],
+                "file": filepath,
+                "line": func["line"],
+                "confidence": "medium",
+                "reason": f"Function '{func['name']}' appears to have no calls within this file"
+            })
+
+    # Check for unused imports
+    for imp in imports:
+        pattern = r'\b' + re.escape(imp["name"]) + r'\b'
+        matches = list(re.finditer(pattern, content))
+
+        if len(matches) <= 1:
+            findings.append({
+                "type": "unused_import",
+                "name": imp["name"],
+                "file": filepath,
+                "line": imp["line"],
+                "confidence": "high",
+                "reason": f"Import '{imp['name']}' is never used in this file"
+            })
+
+    return findings
+
+
+def analyze_with_ai(content: str, filepath: str, language: str, static_findings: List[Dict]) -> List[Dict]:
+    """Use AI to validate and enhance findings"""
+    if len(content) > 10000:  # Skip very large files
+        return static_findings
+
+    # Build context from static findings
+    static_summary = "\n".join([f"- {f['type']}: {f['name']} at line {f['line']}" for f in static_findings[:10]])
+
+    prompt = f"""Analyze this {language} code for dead/unused code. Focus on:
+1. Validating these potential issues found by static analysis:
+{static_summary if static_findings else "No static findings yet"}
+
+2. Finding additional issues like:
+- Unused variables
+- Unreachable code
+- Functions defined but never exported or called
+
+Code ({filepath}):
+```{language}
+{content[:5000]}
+```
+
+Return ONLY a JSON array of findings. Each finding must have:
+- type: "unused_function", "unused_import", "unused_variable", or "unreachable_code"
+- name: the identifier name
+- line: approximate line number
+- confidence: "high", "medium", or "low"
+- reason: brief explanation
+
+If no issues found, return an empty array: []
+Return ONLY valid JSON, no explanation."""
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1000,
+            temperature=0
+        )
+
+        result = response.choices[0].message.content.strip()
+
+        # Try to extract JSON from the response
+        if result.startswith('['):
+            import json
+            ai_findings = json.loads(result)
+
+            # Add file path to each finding
+            for f in ai_findings:
+                f["file"] = filepath
+
+            return ai_findings
+    except:
+        pass
+
+    return static_findings
+
+
+@app.post("/api/deadcode/analyze")
+def analyze_deadcode(req: DeadCodeRequest):
+    """Analyze a GitHub repository for dead code"""
+
+    try:
+        # Fetch file list
+        files = fetch_repo_files(req.owner, req.repo, req.branch, req.token)
+
+        if not files:
+            return {
+                "repository": {"name": f"{req.owner}/{req.repo}"},
+                "findings": [],
+                "summary": {
+                    "files_analyzed": 0,
+                    "total_issues": 0,
+                    "unused_functions": 0,
+                    "unused_imports": 0,
+                    "unused_variables": 0
+                }
+            }
+
+        # Limit files to analyze (for timeout reasons)
+        files_to_analyze = files[:30]  # Analyze up to 30 files
+
+        all_findings = []
+
+        for file_info in files_to_analyze:
+            # Fetch file content
+            content = fetch_file_content(req.owner, req.repo, file_info["sha"], req.token)
+
+            if not content or len(content) < 10:
+                continue
+
+            # Analyze based on language
+            if file_info["language"] == "python":
+                findings = analyze_python_code(content, file_info["path"])
+            else:
+                findings = analyze_javascript_code(content, file_info["path"])
+
+            all_findings.extend(findings)
+
+        # Use AI to validate top findings (limit to avoid timeout)
+        if all_findings and len(files_to_analyze) <= 10:
+            # Pick a few files with findings for AI analysis
+            files_with_findings = list(set(f["file"] for f in all_findings))[:3]
+
+            for filepath in files_with_findings:
+                file_info = next((f for f in files_to_analyze if f["path"] == filepath), None)
+                if file_info:
+                    content = fetch_file_content(req.owner, req.repo, file_info["sha"], req.token)
+                    file_findings = [f for f in all_findings if f["file"] == filepath]
+
+                    ai_findings = analyze_with_ai(content, filepath, file_info["language"], file_findings)
+
+                    # Replace static findings with AI findings for this file
+                    all_findings = [f for f in all_findings if f["file"] != filepath]
+                    all_findings.extend(ai_findings)
+
+        # Calculate summary
+        summary = {
+            "files_analyzed": len(files_to_analyze),
+            "total_issues": len(all_findings),
+            "unused_functions": len([f for f in all_findings if f["type"] == "unused_function"]),
+            "unused_imports": len([f for f in all_findings if f["type"] == "unused_import"]),
+            "unused_variables": len([f for f in all_findings if f["type"] == "unused_variable"])
+        }
+
+        return {
+            "repository": {
+                "name": f"{req.owner}/{req.repo}",
+                "branch": req.branch,
+                "total_files": len(files),
+                "files_analyzed": len(files_to_analyze)
+            },
+            "findings": all_findings,
+            "summary": summary
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Analysis failed: {str(e)}")
