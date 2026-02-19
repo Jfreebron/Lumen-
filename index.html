@@ -670,6 +670,26 @@
             padding: 14px;
         }
 
+        .security-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 14px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            margin-top: 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .security-notice svg {
+            flex-shrink: 0;
+            color: var(--success);
+            margin-top: 1px;
+        }
+
         /* Insights Modal */
         .insights-modal .modal {
             max-width: 800px;
@@ -925,6 +945,13 @@
                         <label>Connection String</label>
                         <textarea class="form-input" id="db-url" rows="3" placeholder="postgresql://user:pass@host:5432/db"></textarea>
                     </div>
+                </div>
+
+                <div class="security-notice">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    <span>Your credentials are stored locally in your browser and never sent to our servers. All database queries are executed directly from your browser to your database.</span>
                 </div>
             </div>
             <div class="modal-actions">
