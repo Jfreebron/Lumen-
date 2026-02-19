@@ -7,17 +7,23 @@
         * { box-sizing: border-box; }
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 40px auto;
             padding: 0 20px;
             background: #fafafa;
         }
-        h1 { margin-bottom: 30px; }
+        h1 { margin-bottom: 10px; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         .input-group {
             display: flex;
             gap: 10px;
         }
-        input {
+        input, textarea {
             flex: 1;
             padding: 14px 18px;
             font-size: 16px;
@@ -25,8 +31,9 @@
             border-radius: 10px;
             outline: none;
             transition: border-color 0.2s;
+            font-family: inherit;
         }
-        input:focus { border-color: #000; }
+        input:focus, textarea:focus { border-color: #000; }
         button {
             padding: 14px 28px;
             background: #000;
@@ -40,6 +47,19 @@
         }
         button:hover { background: #333; }
         button:disabled { background: #999; cursor: not-allowed; }
+        .btn-secondary {
+            background: #fff;
+            color: #000;
+            border: 2px solid #e0e0e0;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .btn-secondary:hover { background: #f5f5f5; }
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
         pre {
             background: #1e1e1e;
             color: #d4d4d4;
@@ -81,17 +101,565 @@
         }
         .chart-container {
             margin-top: 20px;
-            max-height: 400px;
+            height: 300px;
         }
         h3 { margin: 0 0 15px 0; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Data Browser Styles */
+        .data-browser {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .data-browser-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .data-browser-header h2 {
+            margin: 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: #e8f4f8;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .table-chip {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .table-chip:hover {
+            background: #e8f4f8;
+            border-color: #0369a1;
+        }
+        .table-chip .icon {
+            font-size: 16px;
+        }
+        .table-chip .name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Suggestions */
+        .suggestions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .suggestions h4 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .suggestion-chip {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+        }
+        .suggestion-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Schema Modal */
+        .schema-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .schema-modal.active { display: flex; }
+        .schema-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+        .schema-content h2 {
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .schema-content .table-desc {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .column-list {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .column-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        .column-item:last-child { border-bottom: none; }
+        .column-name { font-weight: 500; }
+        .column-type { color: #666; font-family: monospace; font-size: 12px; }
+        .ask-about {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px;
+        }
+        .modal h2 { margin: 0 0 20px 0; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-dot.connected { background: #22c55e; }
+        .status-dot.disconnected { background: #ef4444; }
+
+        /* Welcome state */
+        .welcome {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .welcome h2 {
+            margin: 0 0 10px 0;
+        }
+        .welcome p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Hide technical details by default */
+        .sql-toggle {
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .sql-toggle:hover { color: #000; }
+        .sql-hidden { display: none; }
+
+        /* Insights styles */
+        .insights-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .insights-modal.active { display: block; }
+        .insights-content {
+            background: #fff;
+            margin: 40px auto;
+            max-width: 900px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .insights-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 30px;
+        }
+        .insights-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .health-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .health-score .score {
+            font-size: 28px;
+        }
+        .insights-body {
+            padding: 30px;
+        }
+        .insight-section {
+            margin-bottom: 30px;
+        }
+        .insight-section h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-summary {
+            background: #f0f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .relationship-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .relationship-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .relationship-arrow {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .issue-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: #fef2f2;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .issue-item.warning {
+            background: #fffbeb;
+        }
+        .issue-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .issue-badge.empty { background: #fee2e2; color: #b91c1c; }
+        .issue-badge.nulls { background: #fef3c7; color: #b45309; }
+        .issue-badge.no-pk { background: #e0e7ff; color: #4338ca; }
+        .key-table-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .key-table-item .refs {
+            background: #22c55e;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
-    <h1>AI Data Analyst</h1>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>Database Connection</h2>
 
-    <div class="input-group">
-        <input type="text" id="question" placeholder="Ask a question about your data..." />
-        <button id="btn" onclick="ask()">Analyze</button>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+                <button class="tab-btn active" onclick="switchTab('fields')" id="tab-fields" style="background:none; border:none; padding: 10px 20px; cursor:pointer; font-weight: 500; border-bottom: 2px solid #000; margin-bottom: -2px;">Fields</button>
+                <button class="tab-btn" onclick="switchTab('url')" id="tab-url" style="background:none; border:none; padding: 10px 20px; cursor:pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px;">Connection String</button>
+            </div>
+
+            <div id="fields-tab">
+                <div class="form-group">
+                    <label>Host</label>
+                    <input type="text" id="db-host" placeholder="db.example.com" />
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Port</label>
+                        <input type="text" id="db-port" placeholder="5432" value="5432" />
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Database Name</label>
+                        <input type="text" id="db-name" placeholder="my_database" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="db-user" placeholder="admin" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="db-password" placeholder="********" />
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="db-ssl" checked style="width: auto;" />
+                        Use SSL (recommended)
+                    </label>
+                </div>
+            </div>
+
+            <div id="url-tab" style="display: none;">
+                <div class="form-group">
+                    <label>Connection String</label>
+                    <textarea id="db-url" placeholder="postgresql://user:password@host:port/database"></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button onclick="saveSettings()">Connect</button>
+                <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Modal -->
+    <div id="insights-modal" class="insights-modal">
+        <div class="insights-content">
+            <div class="insights-header">
+                <h2>🔍 Database Insights</h2>
+                <div class="health-score">
+                    <span>Health Score:</span>
+                    <span class="score" id="health-score-value">--</span>
+                    <span>/ 100</span>
+                </div>
+            </div>
+            <div class="insights-body">
+                <div id="ai-summary-section" class="ai-summary" style="display: none;"></div>
+
+                <div class="insight-section">
+                    <h3>📊 Overview</h3>
+                    <div class="stat-grid" id="stats-grid"></div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>🔗 Data Relationships</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">How your tables connect to each other</p>
+                    <div class="relationship-list" id="relationships-list"></div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>⭐ Key Tables</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Most connected tables in your database</p>
+                    <div id="key-tables-list"></div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>⚠️ Issues to Review</h3>
+                    <div id="issues-list"></div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>💡 Suggested Questions</h3>
+                    <div class="suggestion-chips" id="insight-suggestions"></div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn-secondary" onclick="closeInsightsModal()" style="width: 100%;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="schema-modal">
+        <div class="schema-content">
+            <h2>📊 Table Statistics</h2>
+            <p class="table-desc">Row counts for all tables in your database.</p>
+            <div id="stats-content" style="max-height: 400px; overflow-y: auto;">
+                <p>Loading...</p>
+            </div>
+            <div class="form-actions">
+                <button class="btn-secondary" onclick="closeStatsModal()" style="width: 100%;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schema Modal -->
+    <div id="schema-modal" class="schema-modal">
+        <div class="schema-content">
+            <h2>
+                <span style="font-size: 24px;">📊</span>
+                <span id="schema-table-name"></span>
+            </h2>
+            <p class="table-desc" id="schema-table-desc"></p>
+            <h3>Columns</h3>
+            <div class="column-list" id="schema-columns"></div>
+            <div class="ask-about">
+                <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #666;">Ask about this data:</h4>
+                <div id="schema-suggestions" class="suggestion-chips"></div>
+            </div>
+            <div class="form-actions">
+                <button class="btn-secondary" onclick="closeSchemaModal()" style="width: 100%;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>AI Data Analyst</h1>
+        <button class="btn-secondary" onclick="openSettings()">
+            <span id="status-dot" class="status-dot disconnected"></span>
+            Connection
+        </button>
+    </div>
+
+    <!-- Welcome state (no connection) -->
+    <div id="welcome-state" class="welcome" style="display: none;">
+        <h2>Welcome to AI Data Analyst</h2>
+        <p>Connect your database to start asking questions about your data in plain English.</p>
+        <button onclick="openSettings()">Connect Database</button>
+    </div>
+
+    <!-- Data Browser -->
+    <div id="data-browser" class="data-browser" style="display: none;">
+        <div class="data-browser-header">
+            <h2>
+                <span>Your Data</span>
+                <span class="badge" id="table-count">0 tables</span>
+            </h2>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-secondary btn-small" onclick="showInsights()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none;">🔍 Insights</button>
+                <button class="btn-secondary btn-small" onclick="showTableStats()">📊 Stats</button>
+                <button class="btn-secondary btn-small" onclick="loadTables()">Refresh</button>
+            </div>
+        </div>
+        <div class="table-grid" id="table-grid"></div>
+        <div class="suggestions" id="suggestions-area">
+            <h4>Try asking:</h4>
+            <div class="suggestion-chips" id="suggestion-chips"></div>
+        </div>
+    </div>
+
+    <div id="query-area" style="display: none;">
+        <div class="input-group">
+            <input type="text" id="question" placeholder="Ask a question about your data..." />
+            <button id="btn" onclick="ask()">Ask</button>
+        </div>
     </div>
 
     <p id="loading">Analyzing your data...</p>
@@ -100,10 +668,438 @@
 
     <script>
         let chart = null;
+        let currentTab = 'fields';
+        let schemaCache = {};
+        let tablesData = [];
+
+        function getDbUrl() {
+            return localStorage.getItem('db_url') || '';
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('fields-tab').style.display = tab === 'fields' ? 'block' : 'none';
+            document.getElementById('url-tab').style.display = tab === 'url' ? 'block' : 'none';
+            document.getElementById('tab-fields').style.borderBottomColor = tab === 'fields' ? '#000' : 'transparent';
+            document.getElementById('tab-fields').style.color = tab === 'fields' ? '#000' : '#666';
+            document.getElementById('tab-url').style.borderBottomColor = tab === 'url' ? '#000' : 'transparent';
+            document.getElementById('tab-url').style.color = tab === 'url' ? '#000' : '#666';
+        }
+
+        function openSettings() {
+            const saved = getDbUrl();
+            if (saved) {
+                try {
+                    const url = new URL(saved);
+                    document.getElementById('db-host').value = url.hostname || '';
+                    document.getElementById('db-port').value = url.port || '5432';
+                    document.getElementById('db-name').value = url.pathname.slice(1).split('?')[0] || '';
+                    document.getElementById('db-user').value = decodeURIComponent(url.username) || '';
+                    document.getElementById('db-password').value = decodeURIComponent(url.password) || '';
+                    document.getElementById('db-ssl').checked = saved.includes('sslmode=require');
+                } catch (e) {}
+                document.getElementById('db-url').value = saved;
+            }
+            document.getElementById('settings-modal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
+
+        function buildConnectionString() {
+            if (currentTab === 'url') {
+                return document.getElementById('db-url').value.trim();
+            }
+            const host = document.getElementById('db-host').value.trim();
+            const port = document.getElementById('db-port').value.trim() || '5432';
+            const name = document.getElementById('db-name').value.trim();
+            const user = document.getElementById('db-user').value.trim();
+            const password = document.getElementById('db-password').value;
+            const ssl = document.getElementById('db-ssl').checked;
+
+            if (!host || !name || !user) return '';
+
+            let url = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${name}`;
+            if (ssl) url += '?sslmode=require';
+            return url;
+        }
+
+        async function saveSettings() {
+            const dbUrl = buildConnectionString();
+            if (!dbUrl) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            localStorage.setItem('db_url', dbUrl);
+            closeSettings();
+            await loadTables();
+        }
+
+        function updateStatus(connected) {
+            document.getElementById('status-dot').className = connected ? 'status-dot connected' : 'status-dot disconnected';
+        }
+
+        // Friendly table name
+        function friendlyName(name) {
+            return name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        // Get icon for table
+        function getTableIcon(name) {
+            const n = name.toLowerCase();
+            if (n.includes('user')) return '👤';
+            if (n.includes('order') || n.includes('deal')) return '🛒';
+            if (n.includes('product')) return '📦';
+            if (n.includes('company') || n.includes('companies')) return '🏢';
+            if (n.includes('contact')) return '📇';
+            if (n.includes('log') || n.includes('audit')) return '📋';
+            if (n.includes('config') || n.includes('setting')) return '⚙️';
+            if (n.includes('metric') || n.includes('score')) return '📊';
+            if (n.includes('job') || n.includes('task')) return '✅';
+            if (n.includes('session') || n.includes('api')) return '🔑';
+            if (n.includes('notification') || n.includes('alert')) return '🔔';
+            if (n.includes('email') || n.includes('message')) return '✉️';
+            if (n.includes('intent') || n.includes('signal')) return '📡';
+            if (n.includes('persona')) return '🎭';
+            if (n.includes('ranking') || n.includes('score')) return '🏆';
+            return '📁';
+        }
+
+        // Generate suggestions based on tables
+        function generateSuggestions(tables) {
+            const suggestions = [];
+            const t = tables.map(t => t.toLowerCase());
+
+            if (t.some(x => x.includes('user'))) {
+                suggestions.push('How many users do we have?');
+            }
+            if (t.some(x => x.includes('order') || x.includes('deal'))) {
+                suggestions.push('Show me recent deals');
+                suggestions.push('What is our total revenue?');
+            }
+            if (t.some(x => x.includes('company') || x.includes('companies'))) {
+                suggestions.push('How many companies are there?');
+                suggestions.push('Show top companies');
+            }
+            if (t.some(x => x.includes('contact'))) {
+                suggestions.push('List recent contacts');
+            }
+            if (t.some(x => x.includes('product'))) {
+                suggestions.push('Show all products');
+            }
+            if (suggestions.length === 0) {
+                suggestions.push('Show me a summary of the data');
+                suggestions.push('What tables have the most records?');
+            }
+            return suggestions.slice(0, 4);
+        }
+
+        async function showInsights() {
+            document.getElementById('insights-modal').classList.add('active');
+            document.getElementById('health-score-value').textContent = '...';
+            document.getElementById('stats-grid').innerHTML = '<p>Analyzing your database...</p>';
+            document.getElementById('relationships-list').innerHTML = '';
+            document.getElementById('key-tables-list').innerHTML = '';
+            document.getElementById('issues-list').innerHTML = '';
+            document.getElementById('insight-suggestions').innerHTML = '';
+            document.getElementById('ai-summary-section').style.display = 'none';
+
+            const dbUrl = getDbUrl();
+            try {
+                const res = await fetch('/api/insights', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ db_url: dbUrl })
+                });
+                const data = await res.json();
+
+                // Health Score
+                document.getElementById('health-score-value').textContent = data.health_score || 0;
+
+                // AI Summary
+                if (data.ai_summary) {
+                    document.getElementById('ai-summary-section').innerHTML = data.ai_summary;
+                    document.getElementById('ai-summary-section').style.display = 'block';
+                }
+
+                // Stats Grid
+                const summary = data.summary || {};
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="value">${summary.total_tables || 0}</div>
+                        <div class="label">Total Tables</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">${summary.tables_with_data || 0}</div>
+                        <div class="label">With Data</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">${summary.total_relationships || 0}</div>
+                        <div class="label">Relationships</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">${summary.orphaned_tables || 0}</div>
+                        <div class="label">Standalone</div>
+                    </div>
+                `;
+
+                // Relationships
+                const rels = data.relationships || [];
+                if (rels.length > 0) {
+                    document.getElementById('relationships-list').innerHTML = rels.slice(0, 10).map(r => `
+                        <div class="relationship-item">
+                            <span>${friendlyName(r.from_table)}</span>
+                            <span class="relationship-arrow">→</span>
+                            <span>${friendlyName(r.to_table)}</span>
+                            <span style="color: #999; font-size: 12px; margin-left: auto;">via ${r.from_column}</span>
+                        </div>
+                    `).join('');
+                    if (rels.length > 10) {
+                        document.getElementById('relationships-list').innerHTML += `<p style="color: #666; font-size: 13px;">+ ${rels.length - 10} more relationships</p>`;
+                    }
+                } else {
+                    document.getElementById('relationships-list').innerHTML = '<p style="color: #999;">No foreign key relationships found</p>';
+                }
+
+                // Key Tables
+                const keyTables = data.key_tables || [];
+                if (keyTables.length > 0) {
+                    document.getElementById('key-tables-list').innerHTML = keyTables.slice(0, 5).map(t => `
+                        <div class="key-table-item">
+                            <span>📁 ${friendlyName(t.table)}</span>
+                            <span class="refs">${t.references} references</span>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('key-tables-list').innerHTML = '<p style="color: #999;">No highly connected tables found</p>';
+                }
+
+                // Issues
+                const quality = data.data_quality || [];
+                const issues = quality.filter(q => q.issue);
+                if (issues.length > 0) {
+                    document.getElementById('issues-list').innerHTML = issues.slice(0, 10).map(q => {
+                        let badgeClass = 'empty';
+                        let badgeText = 'Empty';
+                        if (q.issue === 'high_nulls') {
+                            badgeClass = 'nulls';
+                            badgeText = 'High NULLs';
+                        } else if (q.issue === 'no_primary_key') {
+                            badgeClass = 'no-pk';
+                            badgeText = 'No Primary Key';
+                        }
+                        return `
+                            <div class="issue-item ${q.issue === 'high_nulls' ? 'warning' : ''}">
+                                <span>${friendlyName(q.table)}</span>
+                                <span class="issue-badge ${badgeClass}">${badgeText}</span>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    document.getElementById('issues-list').innerHTML = '<p style="color: #22c55e;">✓ No major issues found</p>';
+                }
+
+                // Suggested Questions
+                const suggestions = data.suggested_questions || [];
+                if (suggestions.length > 0) {
+                    document.getElementById('insight-suggestions').innerHTML = suggestions.map(s => `
+                        <button class="suggestion-chip" onclick="askFromInsights('${s.question.replace(/'/g, "\\'")}')">${s.question}</button>
+                    `).join('');
+                }
+
+            } catch (e) {
+                document.getElementById('stats-grid').innerHTML = `<p style="color: #c00;">Failed to load insights: ${e.message}</p>`;
+            }
+        }
+
+        function askFromInsights(question) {
+            closeInsightsModal();
+            document.getElementById('question').value = question;
+            ask();
+        }
+
+        function closeInsightsModal() {
+            document.getElementById('insights-modal').classList.remove('active');
+        }
+
+        async function showTableStats() {
+            document.getElementById('stats-modal').classList.add('active');
+            document.getElementById('stats-content').innerHTML = '<p>Loading stats...</p>';
+
+            const dbUrl = getDbUrl();
+            try {
+                const res = await fetch('/api/table-stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ db_url: dbUrl })
+                });
+                const data = await res.json();
+
+                if (data.stats) {
+                    const empty = data.stats.filter(s => s.rows === 0);
+                    const withData = data.stats.filter(s => s.rows > 0);
+
+                    let html = '';
+
+                    if (empty.length > 0) {
+                        html += `<h4 style="margin: 0 0 10px 0; color: #666;">Empty Tables (${empty.length})</h4>`;
+                        html += '<div style="margin-bottom: 20px;">';
+                        empty.forEach(s => {
+                            html += `<div style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                                <span>${friendlyName(s.table)}</span>
+                                <span style="color: #999;">0 rows</span>
+                            </div>`;
+                        });
+                        html += '</div>';
+                    }
+
+                    if (withData.length > 0) {
+                        html += `<h4 style="margin: 0 0 10px 0; color: #666;">Tables with Data (${withData.length})</h4>`;
+                        withData.sort((a, b) => b.rows - a.rows);
+                        withData.forEach(s => {
+                            html += `<div style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                                <span>${friendlyName(s.table)}</span>
+                                <span style="color: #22c55e; font-weight: 500;">${s.rows.toLocaleString()} rows</span>
+                            </div>`;
+                        });
+                    }
+
+                    document.getElementById('stats-content').innerHTML = html;
+                }
+            } catch (e) {
+                document.getElementById('stats-content').innerHTML = '<p style="color: #c00;">Failed to load stats</p>';
+            }
+        }
+
+        function closeStatsModal() {
+            document.getElementById('stats-modal').classList.remove('active');
+        }
+
+        async function showTableSchema(tableName) {
+            const dbUrl = getDbUrl();
+
+            // Generate description
+            const desc = `View and query data from the ${friendlyName(tableName)} table.`;
+            document.getElementById('schema-table-name').textContent = friendlyName(tableName);
+            document.getElementById('schema-table-desc').textContent = desc;
+
+            // Fetch columns
+            try {
+                const res = await fetch('/api/schema-details', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ db_url: dbUrl, table: tableName })
+                });
+                const data = await res.json();
+
+                let html = '';
+                (data.columns || []).forEach(col => {
+                    const friendlyType = col.type.replace('character varying', 'text')
+                        .replace('timestamp without time zone', 'date/time')
+                        .replace('timestamp with time zone', 'date/time')
+                        .replace('integer', 'number')
+                        .replace('bigint', 'number')
+                        .replace('numeric', 'number')
+                        .replace('boolean', 'yes/no');
+                    html += `<div class="column-item">
+                        <span class="column-name">${friendlyName(col.name)}</span>
+                        <span class="column-type">${friendlyType}</span>
+                    </div>`;
+                });
+                document.getElementById('schema-columns').innerHTML = html || '<p>No columns found</p>';
+
+                // Suggestions for this table
+                const suggHtml = [
+                    `How many records in ${friendlyName(tableName)}?`,
+                    `Show me the latest ${friendlyName(tableName)} entries`,
+                    `Summarize ${friendlyName(tableName)} data`
+                ].map(s => `<button class="suggestion-chip" onclick="askQuestion('${s}')">${s}</button>`).join('');
+                document.getElementById('schema-suggestions').innerHTML = suggHtml;
+
+            } catch (e) {
+                document.getElementById('schema-columns').innerHTML = '<p>Could not load columns</p>';
+            }
+
+            document.getElementById('schema-modal').classList.add('active');
+        }
+
+        function closeSchemaModal() {
+            document.getElementById('schema-modal').classList.remove('active');
+        }
+
+        function askQuestion(q) {
+            document.getElementById('question').value = q;
+            closeSchemaModal();
+            ask();
+        }
+
+        async function loadTables() {
+            const dbUrl = getDbUrl();
+
+            if (!dbUrl) {
+                document.getElementById('welcome-state').style.display = 'block';
+                document.getElementById('data-browser').style.display = 'none';
+                document.getElementById('query-area').style.display = 'none';
+                updateStatus(false);
+                return;
+            }
+
+            document.getElementById('welcome-state').style.display = 'none';
+
+            try {
+                const res = await fetch('/api/tables', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ db_url: dbUrl })
+                });
+                const data = await res.json();
+
+                if (data.tables && data.tables.length > 0) {
+                    tablesData = data.tables;
+                    document.getElementById('table-count').textContent = `${data.tables.length} tables`;
+
+                    // Render table chips
+                    let html = '';
+                    data.tables.forEach(t => {
+                        html += `<div class="table-chip" onclick="showTableSchema('${t}')">
+                            <span class="icon">${getTableIcon(t)}</span>
+                            <span class="name">${friendlyName(t)}</span>
+                        </div>`;
+                    });
+                    document.getElementById('table-grid').innerHTML = html;
+
+                    // Generate suggestions
+                    const suggestions = generateSuggestions(data.tables);
+                    document.getElementById('suggestion-chips').innerHTML = suggestions
+                        .map(s => `<button class="suggestion-chip" onclick="askQuestion('${s}')">${s}</button>`)
+                        .join('');
+
+                    document.getElementById('data-browser').style.display = 'block';
+                    document.getElementById('query-area').style.display = 'block';
+                    updateStatus(true);
+                } else {
+                    document.getElementById('data-browser').innerHTML = '<p>No tables found in your database.</p>';
+                    document.getElementById('data-browser').style.display = 'block';
+                    document.getElementById('query-area').style.display = 'block';
+                    updateStatus(true);
+                }
+            } catch (e) {
+                document.getElementById('welcome-state').style.display = 'block';
+                document.getElementById('data-browser').style.display = 'none';
+                updateStatus(false);
+            }
+        }
 
         async function ask() {
             const q = document.getElementById('question').value.trim();
             if (!q) return;
+
+            const dbUrl = getDbUrl();
+            if (!dbUrl) {
+                openSettings();
+                return;
+            }
 
             const btn = document.getElementById('btn');
             btn.disabled = true;
@@ -115,7 +1111,7 @@
                 const res = await fetch('/api/query', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: q })
+                    body: JSON.stringify({ question: q, db_url: dbUrl })
                 });
 
                 const data = await res.json();
@@ -127,13 +1123,11 @@
 
                 let html = '';
 
-                // SQL Card
-                html += `<div class="card"><h3>Generated SQL</h3><pre>${escapeHtml(data.sql)}</pre></div>`;
-
-                // Results Table
-                html += `<div class="card"><h3>Results (${data.rows.length} rows)</h3>`;
-                html += `<div style="overflow-x: auto;"><table><tr>`;
-                data.columns.forEach(c => html += `<th>${escapeHtml(c)}</th>`);
+                // Results Table (prominent)
+                html += `<div class="card">
+                    <h3>Results <span style="font-weight: normal; color: #999;">(${data.rows.length} rows)</span></h3>
+                    <div style="overflow-x: auto;"><table><tr>`;
+                data.columns.forEach(c => html += `<th>${escapeHtml(friendlyName(c))}</th>`);
                 html += '</tr>';
                 data.rows.slice(0, 100).forEach(row => {
                     html += '<tr>' + row.map(v => `<td>${escapeHtml(String(v ?? ''))}</td>`).join('') + '</tr>';
@@ -141,33 +1135,54 @@
                 html += '</table></div></div>';
 
                 // Chart
-                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 50) {
+                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 100) {
                     html += `<div class="card"><h3>Visualization</h3><div class="chart-container"><canvas id="chart"></canvas></div></div>`;
                 }
 
+                // SQL (collapsed by default)
+                html += `<div class="card">
+                    <span class="sql-toggle" onclick="toggleSql()">
+                        <span id="sql-arrow">▶</span> Show SQL Query
+                    </span>
+                    <pre id="sql-block" class="sql-hidden">${escapeHtml(data.sql)}</pre>
+                </div>`;
+
                 document.getElementById('results').innerHTML = html;
 
-                // Render chart if applicable
-                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 50) {
-                    const labels = data.rows.map(r => String(r[0]));
-                    const values = data.rows.map(r => parseFloat(r[1]));
+                // Render chart
+                if (data.columns.length >= 2 && data.rows.length > 0 && data.rows.length <= 100) {
+                    let labelCol = 0;
+                    let valueCol = -1;
 
-                    if (values.every(v => !isNaN(v))) {
-                        const ctx = document.getElementById('chart');
+                    for (let i = 1; i < data.columns.length; i++) {
+                        const testVal = parseFloat(data.rows[0][i]);
+                        if (!isNaN(testVal)) {
+                            valueCol = i;
+                            break;
+                        }
+                    }
+
+                    if (valueCol === -1) valueCol = 1;
+
+                    const labels = data.rows.map(r => String(r[labelCol]));
+                    const values = data.rows.map(r => parseFloat(r[valueCol]) || 0);
+
+                    const ctx = document.getElementById('chart');
+                    if (ctx) {
                         chart = new Chart(ctx, {
                             type: 'bar',
                             data: {
                                 labels: labels,
                                 datasets: [{
-                                    label: data.columns[1],
+                                    label: friendlyName(data.columns[valueCol]),
                                     data: values,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                                    backgroundColor: 'rgba(102, 126, 234, 0.8)'
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: false } }
+                                plugins: { legend: { display: true } }
                             }
                         });
                     }
@@ -180,6 +1195,18 @@
             }
         }
 
+        function toggleSql() {
+            const block = document.getElementById('sql-block');
+            const arrow = document.getElementById('sql-arrow');
+            if (block.classList.contains('sql-hidden')) {
+                block.classList.remove('sql-hidden');
+                arrow.textContent = '▼';
+            } else {
+                block.classList.add('sql-hidden');
+                arrow.textContent = '▶';
+            }
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -189,6 +1216,24 @@
         document.getElementById('question').addEventListener('keypress', e => {
             if (e.key === 'Enter') ask();
         });
+
+        document.getElementById('settings-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'settings-modal') closeSettings();
+        });
+
+        document.getElementById('schema-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'schema-modal') closeSchemaModal();
+        });
+
+        document.getElementById('stats-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'stats-modal') closeStatsModal();
+        });
+
+        document.getElementById('insights-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'insights-modal') closeInsightsModal();
+        });
+
+        loadTables();
     </script>
 </body>
 </html>

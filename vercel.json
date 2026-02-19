@@ -1,9 +1,10 @@
 {
   "builds": [
-    { "src": "api/query.py", "use": "@vercel/python" }
+    { "src": "api/query.py", "use": "@vercel/python" },
+    { "src": "index.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "api/query.py" },
-    { "src": "/(.*)", "dest": "index.html" }
+    { "src": "/", "dest": "index.html" }
   ]
 }
