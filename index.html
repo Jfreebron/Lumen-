@@ -775,6 +775,69 @@
             gap: 8px;
         }
 
+        .claude-prompt-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+            margin-top: 24px;
+        }
+
+        .prompt-description {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .claude-prompt-container {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .claude-prompt-container pre {
+            padding: 16px;
+            padding-right: 60px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .copy-prompt-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-prompt-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .copy-prompt-btn.copied {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
         .relationship-item {
             display: flex;
             align-items: center;
@@ -996,6 +1059,21 @@
                     <h3>💡 Suggested Questions</h3>
                     <div class="suggestion-chips" id="insight-suggestions"></div>
                 </div>
+
+                <div class="insight-section claude-prompt-section" id="claude-prompt-section" style="display: none;">
+                    <h3>🤖 Claude Code Prompt</h3>
+                    <p class="prompt-description">Copy this prompt to Claude Code to implement suggested improvements:</p>
+                    <div class="claude-prompt-container">
+                        <pre id="claude-prompt-content"></pre>
+                        <button class="copy-prompt-btn" onclick="copyClaudePrompt()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeInsightsModal()" style="width: 100%;">Close</button>
@@ -1213,6 +1291,7 @@
             document.getElementById('issues-list').innerHTML = '';
             document.getElementById('insight-suggestions').innerHTML = '';
             document.getElementById('ai-summary-section').style.display = 'none';
+            document.getElementById('claude-prompt-section').style.display = 'none';
 
             const dbUrl = getDbUrl();
             try {
@@ -1284,6 +1363,15 @@
                     <button class="suggestion-chip" onclick="askFromInsights('${s.question.replace(/'/g, "\\'")}')">${s.question}</button>
                 `).join('');
 
+                // Generate Claude Code prompt if there are issues
+                const claudePrompt = generateClaudePrompt(data);
+                if (claudePrompt) {
+                    document.getElementById('claude-prompt-content').textContent = claudePrompt;
+                    document.getElementById('claude-prompt-section').style.display = 'block';
+                } else {
+                    document.getElementById('claude-prompt-section').style.display = 'none';
+                }
+
             } catch (e) {
                 document.getElementById('stats-grid').innerHTML = `<p class="error">Failed to load insights</p>`;
             }
@@ -1293,6 +1381,80 @@
             closeInsightsModal();
             document.getElementById('question').value = question;
             ask();
+        }
+
+        function generateClaudePrompt(data) {
+            const issues = (data.data_quality || []).filter(q => q.issue);
+            const relationships = data.relationships || [];
+            const keyTables = data.key_tables || [];
+            const summary = data.summary || {};
+
+            if (issues.length === 0 && summary.orphaned_tables === 0) {
+                return null;
+            }
+
+            let prompt = `I need help improving my PostgreSQL database. Here's what I found:\n\n`;
+            prompt += `## Current State\n`;
+            prompt += `- ${summary.total_tables || 0} tables total\n`;
+            prompt += `- ${summary.tables_with_data || 0} tables with data\n`;
+            prompt += `- ${summary.total_relationships || 0} foreign key relationships\n`;
+            prompt += `- ${summary.orphaned_tables || 0} standalone tables (no relationships)\n\n`;
+
+            if (issues.length > 0) {
+                prompt += `## Issues Found\n`;
+                const emptyTables = issues.filter(i => i.issue === 'empty');
+                const highNulls = issues.filter(i => i.issue === 'high_nulls');
+                const noPK = issues.filter(i => i.issue === 'no_primary_key');
+
+                if (emptyTables.length > 0) {
+                    prompt += `\n### Empty Tables (${emptyTables.length})\n`;
+                    emptyTables.forEach(t => prompt += `- ${t.table}\n`);
+                }
+                if (highNulls.length > 0) {
+                    prompt += `\n### Tables with High NULL Rates\n`;
+                    highNulls.forEach(t => prompt += `- ${t.table} (${t.null_rate}% NULLs)\n`);
+                }
+                if (noPK.length > 0) {
+                    prompt += `\n### Tables Missing Primary Keys\n`;
+                    noPK.forEach(t => prompt += `- ${t.table}\n`);
+                }
+            }
+
+            if (keyTables.length > 0) {
+                prompt += `\n## Key Tables (most referenced)\n`;
+                keyTables.slice(0, 5).forEach(t => prompt += `- ${t.table} (${t.references} references)\n`);
+            }
+
+            prompt += `\n## What I Need\n`;
+            prompt += `Please suggest SQL migrations or schema changes to:\n`;
+            if (issues.some(i => i.issue === 'empty')) {
+                prompt += `1. Decide whether to keep or remove empty tables\n`;
+            }
+            if (issues.some(i => i.issue === 'high_nulls')) {
+                prompt += `2. Add NOT NULL constraints or default values where appropriate\n`;
+            }
+            if (issues.some(i => i.issue === 'no_primary_key')) {
+                prompt += `3. Add primary keys to tables that are missing them\n`;
+            }
+            if (summary.orphaned_tables > 0) {
+                prompt += `4. Consider adding foreign key relationships for standalone tables\n`;
+            }
+            prompt += `\nProvide the SQL commands I can run to implement these improvements safely.`;
+
+            return prompt;
+        }
+
+        function copyClaudePrompt() {
+            const content = document.getElementById('claude-prompt-content').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const btn = document.querySelector('.copy-prompt-btn');
+                btn.classList.add('copied');
+                btn.querySelector('span').textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.querySelector('span').textContent = 'Copy';
+                }, 2000);
+            });
         }
 
         function closeInsightsModal() {
