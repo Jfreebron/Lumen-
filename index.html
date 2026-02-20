@@ -1379,6 +1379,169 @@
             color: var(--text-secondary);
         }
 
+        /* Explain Repo Styles */
+        .tech-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent-light);
+        }
+
+        .explain-summary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .explain-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .explain-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--accent-light);
+        }
+
+        .explain-section-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .explain-content {
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .explain-content p {
+            margin-bottom: 12px;
+        }
+
+        .explain-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .key-files-list {
+            padding: 12px;
+        }
+
+        .key-file-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .key-file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .key-file-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .key-file-info {
+            flex: 1;
+        }
+
+        .key-file-path {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .key-file-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .commands-list {
+            padding: 16px 20px;
+        }
+
+        .command-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 13px;
+        }
+
+        .command-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .command-label {
+            color: var(--text-tertiary);
+            min-width: 80px;
+        }
+
+        .command-value {
+            color: var(--accent-light);
+            flex: 1;
+        }
+
+        .folder-tree {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .folder-tree .folder {
+            color: var(--accent-light);
+        }
+
+        .folder-tree .desc {
+            color: var(--text-tertiary);
+            margin-left: 8px;
+        }
+
         @media (max-width: 768px) {
             .deps-health-banner {
                 flex-direction: column;
@@ -1718,6 +1881,14 @@
                 </svg>
                 Dependencies
             </button>
+            <button class="nav-tab" onclick="switchPage('explain')" id="tab-explain">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                Explain Repo
+            </button>
         </div>
 
         <!-- DATABASE PAGE -->
@@ -2015,6 +2186,147 @@
             </div>
         </div>
         <!-- END DEPENDENCY AUDITOR PAGE -->
+
+        <!-- EXPLAIN REPO PAGE -->
+        <div id="page-explain" class="page-content" style="display: none;">
+            <!-- Explain Welcome State -->
+            <div id="explain-welcome" class="welcome">
+                <div class="welcome-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <h2>Explain This Repo</h2>
+                <p>Get an instant understanding of any GitHub repository - architecture, key files, tech stack, and how it all works together.</p>
+
+                <div class="code-input-form">
+                    <div class="form-group">
+                        <label>GitHub Repository URL</label>
+                        <input type="text" class="form-input" id="explain-github-url" placeholder="https://github.com/username/repo" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Branch <span class="optional">(optional)</span></label>
+                            <input type="text" class="form-input" id="explain-github-branch" placeholder="main" />
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>GitHub Token <span class="optional">(optional)</span></label>
+                            <input type="password" class="form-input" id="explain-github-token" placeholder="ghp_xxxxx" />
+                        </div>
+                    </div>
+                    <div class="security-notice" style="margin-bottom: 16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>Perfect for understanding new codebases, onboarding, or exploring open source projects.</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="explainRepo()" style="width: 100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        Explain Repository
+                    </button>
+                </div>
+            </div>
+
+            <!-- Explain Progress -->
+            <div id="explain-progress" class="code-progress" style="display: none;">
+                <div class="progress-header">
+                    <h3>Analyzing Repository</h3>
+                    <span id="explain-progress-status">Scanning structure...</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="explain-analysis-progress"></div>
+                </div>
+                <div class="progress-details" id="explain-progress-details"></div>
+            </div>
+
+            <!-- Explain Results -->
+            <div id="explain-results" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2 id="explain-repo-name">Repository</h2>
+                        <div class="tech-badges" id="tech-badges"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="copyExplanation()">📋 Copy</button>
+                        <button class="btn btn-ghost" onclick="resetExplainAnalysis()">New Repo</button>
+                    </div>
+                </div>
+
+                <!-- Quick Summary -->
+                <div class="explain-summary" id="explain-summary"></div>
+
+                <!-- Architecture Section -->
+                <div class="explain-section">
+                    <div class="explain-section-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <h3>Architecture</h3>
+                    </div>
+                    <div class="explain-content" id="architecture-content"></div>
+                </div>
+
+                <!-- Key Files Section -->
+                <div class="explain-section">
+                    <div class="explain-section-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <h3>Key Files</h3>
+                    </div>
+                    <div class="key-files-list" id="key-files-content"></div>
+                </div>
+
+                <!-- Data Flow Section -->
+                <div class="explain-section">
+                    <div class="explain-section-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <h3>How It Works</h3>
+                    </div>
+                    <div class="explain-content" id="dataflow-content"></div>
+                </div>
+
+                <!-- Getting Started Section -->
+                <div class="explain-section">
+                    <div class="explain-section-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <h3>Getting Started</h3>
+                    </div>
+                    <div class="commands-list" id="commands-content"></div>
+                </div>
+
+                <!-- Contributing Section -->
+                <div class="explain-section">
+                    <div class="explain-section-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <h3>How to Contribute</h3>
+                    </div>
+                    <div class="explain-content" id="contributing-content"></div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXPLAIN REPO PAGE -->
 
         <!-- Deps Prompt Modal -->
         <div id="deps-prompt-modal" class="modal-overlay">
@@ -2570,6 +2882,173 @@
 
         function closeDepsPromptModal() {
             document.getElementById('deps-prompt-modal').classList.remove('active');
+        }
+
+        // ============== EXPLAIN REPO ==============
+        let explainData = null;
+
+        async function explainRepo() {
+            const urlInput = document.getElementById('explain-github-url').value.trim();
+            const branch = document.getElementById('explain-github-branch').value.trim() || 'main';
+            const token = document.getElementById('explain-github-token').value.trim();
+
+            if (!urlInput) {
+                alert('Please enter a GitHub repository URL');
+                return;
+            }
+
+            const match = urlInput.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+            if (!match) {
+                alert('Invalid GitHub URL. Please use format: https://github.com/username/repo');
+                return;
+            }
+
+            const owner = match[1];
+            const repo = match[2].replace(/\.git$/, '');
+
+            if (token) saveGitHubToken(token);
+
+            // Show progress
+            document.getElementById('explain-welcome').style.display = 'none';
+            document.getElementById('explain-progress').style.display = 'block';
+            document.getElementById('explain-results').style.display = 'none';
+            document.getElementById('explain-analysis-progress').style.width = '20%';
+            document.getElementById('explain-progress-status').textContent = 'Scanning repository structure...';
+
+            try {
+                const response = await fetch('/api/explain/repo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        owner,
+                        repo,
+                        branch,
+                        token: token || getGitHubToken()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                explainData = data;
+                displayExplainResults(data);
+
+            } catch (error) {
+                alert('Analysis failed: ' + error.message);
+                resetExplainAnalysis();
+            }
+        }
+
+        function displayExplainResults(data) {
+            document.getElementById('explain-progress').style.display = 'none';
+            document.getElementById('explain-results').style.display = 'block';
+
+            // Repo name
+            document.getElementById('explain-repo-name').textContent = data.repository?.name || 'Repository';
+
+            // Tech badges
+            const techBadges = document.getElementById('tech-badges');
+            techBadges.innerHTML = (data.tech_stack || []).map(tech =>
+                `<span class="tech-badge">${escapeHtml(tech)}</span>`
+            ).join('');
+
+            // Summary
+            document.getElementById('explain-summary').innerHTML = data.summary || 'No summary available.';
+
+            // Architecture
+            const archContent = document.getElementById('architecture-content');
+            if (data.architecture) {
+                archContent.innerHTML = `<div class="folder-tree">${data.architecture}</div>`;
+            } else {
+                archContent.innerHTML = '<p>Architecture information not available.</p>';
+            }
+
+            // Key files
+            const keyFilesContent = document.getElementById('key-files-content');
+            if (data.key_files && data.key_files.length > 0) {
+                keyFilesContent.innerHTML = data.key_files.map(file => `
+                    <div class="key-file-item">
+                        <div class="key-file-icon">${getFileIcon(file.path)}</div>
+                        <div class="key-file-info">
+                            <div class="key-file-path">${escapeHtml(file.path)}</div>
+                            <div class="key-file-desc">${escapeHtml(file.description)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                keyFilesContent.innerHTML = '<p style="padding: 16px; color: var(--text-tertiary);">No key files identified.</p>';
+            }
+
+            // Data flow / How it works
+            document.getElementById('dataflow-content').innerHTML = data.how_it_works || '<p>Flow information not available.</p>';
+
+            // Commands
+            const commandsContent = document.getElementById('commands-content');
+            if (data.commands && data.commands.length > 0) {
+                commandsContent.innerHTML = data.commands.map(cmd => `
+                    <div class="command-item">
+                        <span class="command-label">${escapeHtml(cmd.label)}</span>
+                        <span class="command-value">${escapeHtml(cmd.command)}</span>
+                    </div>
+                `).join('');
+            } else {
+                commandsContent.innerHTML = '<p style="color: var(--text-tertiary);">No commands identified.</p>';
+            }
+
+            // Contributing
+            document.getElementById('contributing-content').innerHTML = data.contributing || '<p>Check the README for contribution guidelines.</p>';
+        }
+
+        function getFileIcon(path) {
+            const ext = path.split('.').pop().toLowerCase();
+            const icons = {
+                'js': '📜', 'jsx': '⚛️', 'ts': '📘', 'tsx': '⚛️',
+                'py': '🐍', 'rb': '💎', 'go': '🔷', 'rs': '🦀',
+                'json': '📋', 'yaml': '📋', 'yml': '📋', 'toml': '📋',
+                'md': '📝', 'html': '🌐', 'css': '🎨', 'scss': '🎨',
+                'sql': '🗃️', 'graphql': '◼️', 'prisma': '🔺',
+                'dockerfile': '🐳', 'docker': '🐳',
+                'env': '🔐', 'lock': '🔒'
+            };
+
+            if (path.includes('package.json')) return '📦';
+            if (path.includes('README')) return '📖';
+            if (path.includes('Dockerfile')) return '🐳';
+            if (path.includes('.env')) return '🔐';
+
+            return icons[ext] || '📄';
+        }
+
+        function resetExplainAnalysis() {
+            document.getElementById('explain-welcome').style.display = 'block';
+            document.getElementById('explain-progress').style.display = 'none';
+            document.getElementById('explain-results').style.display = 'none';
+            explainData = null;
+        }
+
+        function copyExplanation() {
+            if (!explainData) return;
+
+            let text = `# ${explainData.repository?.name || 'Repository'}\n\n`;
+            text += `## Tech Stack\n${(explainData.tech_stack || []).join(', ')}\n\n`;
+            text += `## Summary\n${explainData.summary?.replace(/<[^>]*>/g, '') || ''}\n\n`;
+            text += `## Architecture\n${explainData.architecture?.replace(/<[^>]*>/g, '') || ''}\n\n`;
+            text += `## Key Files\n`;
+            (explainData.key_files || []).forEach(f => {
+                text += `- **${f.path}**: ${f.description}\n`;
+            });
+            text += `\n## How It Works\n${explainData.how_it_works?.replace(/<[^>]*>/g, '') || ''}\n\n`;
+            text += `## Commands\n`;
+            (explainData.commands || []).forEach(c => {
+                text += `- ${c.label}: \`${c.command}\`\n`;
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Explanation copied to clipboard!');
+            });
         }
 
         function getDbUrl() {

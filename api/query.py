@@ -1265,3 +1265,247 @@ def audit_dependencies(req: DeadCodeRequest):
         raise
     except Exception as e:
         raise HTTPException(500, f"Audit failed: {str(e)}")
+
+
+# ============== EXPLAIN REPO ==============
+
+# Tech stack detection patterns
+TECH_PATTERNS = {
+    "React": ["package.json:react", ".jsx", ".tsx", "react-dom"],
+    "Next.js": ["next.config", "package.json:next", "/app/", "/pages/"],
+    "Vue.js": ["package.json:vue", ".vue", "nuxt.config"],
+    "Angular": ["angular.json", "package.json:@angular"],
+    "Svelte": ["svelte.config", ".svelte"],
+    "Node.js": ["package.json", "node_modules"],
+    "Express": ["package.json:express"],
+    "FastAPI": ["requirements.txt:fastapi", "main.py:FastAPI"],
+    "Django": ["manage.py", "settings.py", "requirements.txt:django"],
+    "Flask": ["requirements.txt:flask", "app.py:Flask"],
+    "Python": [".py", "requirements.txt", "pyproject.toml"],
+    "TypeScript": ["tsconfig.json", ".ts", ".tsx"],
+    "JavaScript": [".js", ".mjs"],
+    "Tailwind CSS": ["tailwind.config"],
+    "PostgreSQL": ["prisma:postgresql", ".sql", "migrations"],
+    "MongoDB": ["package.json:mongoose", "mongodb"],
+    "Prisma": ["schema.prisma", "prisma/"],
+    "Docker": ["Dockerfile", "docker-compose"],
+    "Vercel": ["vercel.json"],
+    "AWS": ["serverless.yml", "sam-template", "cdk.json"],
+}
+
+# Important files to look for
+IMPORTANT_FILES = [
+    "README.md", "README", "readme.md",
+    "package.json", "requirements.txt", "pyproject.toml", "Cargo.toml", "go.mod",
+    "tsconfig.json", "next.config.js", "next.config.ts", "vite.config.js",
+    "docker-compose.yml", "Dockerfile",
+    ".env.example", ".env.local.example",
+    "prisma/schema.prisma", "schema.prisma",
+    "app.py", "main.py", "index.js", "index.ts", "server.js", "server.ts",
+    "src/index.js", "src/index.ts", "src/main.js", "src/main.ts",
+    "src/App.jsx", "src/App.tsx", "app/page.tsx", "pages/index.tsx",
+]
+
+
+def detect_tech_stack(files: List[str], file_contents: Dict[str, str]) -> List[str]:
+    """Detect technologies used in the repository"""
+    detected = set()
+    files_str = " ".join(files)
+
+    for tech, patterns in TECH_PATTERNS.items():
+        for pattern in patterns:
+            if ":" in pattern:
+                # Check file content
+                file_part, search = pattern.split(":", 1)
+                for filepath, content in file_contents.items():
+                    if file_part in filepath and search.lower() in content.lower():
+                        detected.add(tech)
+                        break
+            else:
+                # Check file paths
+                if pattern in files_str:
+                    detected.add(tech)
+
+    return sorted(list(detected))
+
+
+def analyze_structure(files: List[str]) -> Dict[str, List[str]]:
+    """Analyze repository folder structure"""
+    structure = defaultdict(list)
+
+    for filepath in files:
+        parts = filepath.split("/")
+        if len(parts) > 1:
+            top_folder = parts[0]
+            structure[top_folder].append(filepath)
+
+    return dict(structure)
+
+
+def generate_repo_explanation(
+    owner: str,
+    repo: str,
+    files: List[str],
+    file_contents: Dict[str, str],
+    tech_stack: List[str],
+    structure: Dict[str, List[str]]
+) -> Dict:
+    """Use AI to generate comprehensive repo explanation"""
+
+    # Build context for AI
+    files_summary = "\n".join(files[:100])  # Limit for context
+
+    # Get key file contents
+    key_contents = ""
+    for filepath, content in list(file_contents.items())[:5]:
+        truncated = content[:1500] if len(content) > 1500 else content
+        key_contents += f"\n--- {filepath} ---\n{truncated}\n"
+
+    # Folder structure summary
+    folder_summary = ""
+    for folder, folder_files in list(structure.items())[:15]:
+        file_count = len(folder_files)
+        sample_files = ", ".join([f.split("/")[-1] for f in folder_files[:5]])
+        folder_summary += f"/{folder}/ ({file_count} files): {sample_files}\n"
+
+    prompt = f"""Analyze this GitHub repository and provide a comprehensive explanation for developers.
+
+Repository: {owner}/{repo}
+Detected Tech Stack: {', '.join(tech_stack)}
+
+Folder Structure:
+{folder_summary}
+
+All Files (sample):
+{files_summary[:2000]}
+
+Key File Contents:
+{key_contents}
+
+Please provide a JSON response with these exact fields:
+{{
+    "summary": "A 2-3 sentence plain English summary of what this project does and who it's for",
+    "architecture": "HTML formatted folder structure with descriptions, like: <span class='folder'>/src</span> <span class='desc'>→ Main source code</span><br>",
+    "key_files": [
+        {{"path": "file/path.js", "description": "What this file does"}},
+        ...up to 8 key files
+    ],
+    "how_it_works": "HTML formatted explanation of how data flows through the app, entry points, etc. Use <p> tags.",
+    "commands": [
+        {{"label": "Install", "command": "npm install"}},
+        {{"label": "Dev", "command": "npm run dev"}},
+        ...common commands
+    ],
+    "contributing": "HTML formatted tips for new contributors - where to start, what to modify"
+}}
+
+Return ONLY valid JSON, no markdown or explanation."""
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000,
+            temperature=0.3
+        )
+
+        result = response.choices[0].message.content.strip()
+
+        # Extract JSON
+        import json
+        if "{" in result:
+            start = result.index("{")
+            end = result.rindex("}") + 1
+            return json.loads(result[start:end])
+    except Exception as e:
+        pass
+
+    # Fallback response
+    return {
+        "summary": f"This is a {', '.join(tech_stack[:3])} project.",
+        "architecture": "Unable to generate architecture analysis.",
+        "key_files": [],
+        "how_it_works": "<p>Unable to generate flow analysis.</p>",
+        "commands": [],
+        "contributing": "<p>Check the README for contribution guidelines.</p>"
+    }
+
+
+@app.post("/api/explain/repo")
+def explain_repo(req: DeadCodeRequest):
+    """Generate comprehensive explanation of a GitHub repository"""
+
+    try:
+        # Fetch file tree
+        headers = get_github_headers(req.token)
+        url = f"https://api.github.com/repos/{req.owner}/{req.repo}/git/trees/{req.branch}?recursive=1"
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 404:
+            raise HTTPException(404, "Repository or branch not found")
+        elif response.status_code != 200:
+            raise HTTPException(response.status_code, f"GitHub API error: {response.text}")
+
+        data = response.json()
+
+        # Get all file paths
+        files = []
+        for item in data.get("tree", []):
+            if item["type"] == "blob":
+                files.append(item["path"])
+
+        # Skip common non-essential directories
+        skip_patterns = ['node_modules/', '.git/', '__pycache__/', 'dist/', 'build/', '.next/', 'vendor/', '.venv/', 'venv/']
+        files = [f for f in files if not any(skip in f for skip in skip_patterns)]
+
+        # Analyze structure
+        structure = analyze_structure(files)
+
+        # Fetch important files
+        file_contents = {}
+        files_to_fetch = []
+
+        for important in IMPORTANT_FILES:
+            matching = [f for f in files if f.endswith(important) or f == important]
+            files_to_fetch.extend(matching[:2])  # Limit per pattern
+
+        # Also get entry points
+        entry_patterns = ['index.', 'main.', 'app.', 'server.', 'page.']
+        for pattern in entry_patterns:
+            matching = [f for f in files if pattern in f.lower() and f.count('/') <= 2]
+            files_to_fetch.extend(matching[:2])
+
+        # Fetch file contents (limit to prevent timeout)
+        files_to_fetch = list(set(files_to_fetch))[:15]
+
+        for filepath in files_to_fetch:
+            # Find the file in the tree to get its SHA
+            file_info = next((item for item in data.get("tree", []) if item["path"] == filepath), None)
+            if file_info:
+                content = fetch_file_content(req.owner, req.repo, file_info["sha"], req.token)
+                if content:
+                    file_contents[filepath] = content
+
+        # Detect tech stack
+        tech_stack = detect_tech_stack(files, file_contents)
+
+        # Generate AI explanation
+        explanation = generate_repo_explanation(
+            req.owner, req.repo, files, file_contents, tech_stack, structure
+        )
+
+        return {
+            "repository": {"name": f"{req.owner}/{req.repo}"},
+            "tech_stack": tech_stack,
+            "summary": explanation.get("summary", ""),
+            "architecture": explanation.get("architecture", ""),
+            "key_files": explanation.get("key_files", []),
+            "how_it_works": explanation.get("how_it_works", ""),
+            "commands": explanation.get("commands", []),
+            "contributing": explanation.get("contributing", "")
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Analysis failed: {str(e)}")
