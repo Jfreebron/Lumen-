@@ -2399,9 +2399,24 @@
                     </div>
                     <h2 style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Success!</h2>
                     <p id="clone-success-message" style="margin-bottom: 16px;"></p>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    <!-- Local mode: show clone path -->
+                    <div id="clone-local-info" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; display: none;">
                         <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 6px;">CLONED TO</div>
                         <div id="clone-success-path" style="font-family: 'SF Mono', Monaco, monospace; font-size: 14px; color: var(--accent-light);"></div>
+                    </div>
+                    <!-- Remote mode: show copy-paste command -->
+                    <div id="clone-remote-info" style="max-width: 600px; margin: 0 auto 24px; display: none;">
+                        <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">RUN THIS IN YOUR TERMINAL</div>
+                        <div class="claude-prompt-container" style="text-align: left;">
+                            <pre id="clone-command-text" style="padding: 16px; padding-right: 60px; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; font-size: 13px; line-height: 1.6; color: var(--accent-light); white-space: pre-wrap; word-break: break-word; margin: 0;"></pre>
+                            <button class="copy-prompt-btn" onclick="copyCloneCommand()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span>Copy</span>
+                            </button>
+                        </div>
                     </div>
                     <button class="btn btn-primary" onclick="resetCloneAndCode()">Clone Another Repo</button>
                 </div>
@@ -3210,7 +3225,18 @@
                     document.getElementById('clone-progress').style.display = 'none';
                     document.getElementById('clone-success').style.display = 'block';
                     document.getElementById('clone-success-message').textContent = data.message;
-                    document.getElementById('clone-success-path').textContent = data.clone_path;
+
+                    if (data.is_remote) {
+                        // Vercel mode: show copy-paste command
+                        document.getElementById('clone-local-info').style.display = 'none';
+                        document.getElementById('clone-remote-info').style.display = 'block';
+                        document.getElementById('clone-command-text').textContent = data.local_command;
+                    } else {
+                        // Local mode: show clone path
+                        document.getElementById('clone-remote-info').style.display = 'none';
+                        document.getElementById('clone-local-info').style.display = 'block';
+                        document.getElementById('clone-success-path').textContent = data.clone_path;
+                    }
                 }, 500);
 
             } catch (err) {
@@ -3221,11 +3247,26 @@
             }
         }
 
+        function copyCloneCommand() {
+            const text = document.getElementById('clone-command-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('#clone-remote-info .copy-prompt-btn');
+                btn.classList.add('copied');
+                btn.querySelector('span').textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.querySelector('span').textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
         function resetCloneAndCode() {
             document.getElementById('clone-welcome').style.display = 'block';
             document.getElementById('clone-progress').style.display = 'none';
             document.getElementById('clone-success').style.display = 'none';
             document.getElementById('clone-error').style.display = 'none';
+            document.getElementById('clone-local-info').style.display = 'none';
+            document.getElementById('clone-remote-info').style.display = 'none';
             document.getElementById('clone-progress-bar').style.width = '0%';
         }
 

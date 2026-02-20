@@ -1520,12 +1520,13 @@ class CloneAndCodeRequest(BaseModel):
     branch: str = "main"
 
 
-CLONE_BASE_DIR = r"C:\Users\JFree\ClonedRepos"
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+CLONE_BASE_DIR_LOCAL = r"C:\Users\JFree\ClonedRepos"
 
 
 @app.post("/api/clone-and-code")
 def clone_and_code(req: CloneAndCodeRequest):
-    """Clone a GitHub repo locally and open Claude Code in a new CMD window."""
+    """Clone a GitHub repo and open Claude Code. Works on both Vercel and local."""
 
     if not req.repo_url:
         raise HTTPException(400, "Repository URL required")
@@ -1546,58 +1547,112 @@ def clone_and_code(req: CloneAndCodeRequest):
         raise HTTPException(400, "Invalid branch name")
 
     clone_url = f"https://github.com/{owner}/{repo}.git"
-    repo_dir = os.path.join(CLONE_BASE_DIR, repo)
 
-    # Ensure base directory exists
-    os.makedirs(CLONE_BASE_DIR, exist_ok=True)
+    if IS_VERCEL:
+        # --- VERCEL MODE: clone to /tmp to validate, return copy-paste command ---
+        import tempfile
+        tmp_dir = os.path.join(tempfile.gettempdir(), f"lumen-{repo}")
 
-    already_existed = os.path.isdir(repo_dir)
+        already_existed = False
+        if not os.path.isdir(tmp_dir):
+            try:
+                result = subprocess.run(
+                    ["git", "clone", "--branch", req.branch, "--single-branch", "--depth", "1", clone_url, tmp_dir],
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                if result.returncode != 0:
+                    stderr = result.stderr.strip()
+                    if os.path.isdir(tmp_dir):
+                        shutil.rmtree(tmp_dir, ignore_errors=True)
+                    if "not found" in stderr.lower() or "Repository not found" in stderr:
+                        raise HTTPException(404, f"Repository not found: {owner}/{repo}")
+                    raise HTTPException(500, f"Git clone failed: {stderr}")
+            except subprocess.TimeoutExpired:
+                if os.path.isdir(tmp_dir):
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
+                raise HTTPException(408, "Clone timed out. The repository may be too large.")
+            except HTTPException:
+                raise
+            except Exception as e:
+                if os.path.isdir(tmp_dir):
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
+                raise HTTPException(500, f"Clone failed: {str(e)}")
+        else:
+            already_existed = True
 
-    if not already_existed:
-        # Clone the repo
-        try:
-            result = subprocess.run(
-                ["git", "clone", "--branch", req.branch, "--single-branch", clone_url, repo_dir],
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            if result.returncode != 0:
-                stderr = result.stderr.strip()
-                # Clean up partial clone on failure
+        # Build the command the user should run locally
+        branch_flag = f" -b {req.branch}" if req.branch != "main" else ""
+        local_command = f"git clone{branch_flag} {clone_url} && cd {repo} && claude"
+
+        # Clean up /tmp clone (ephemeral anyway, but be tidy)
+        if os.path.isdir(tmp_dir):
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
+        return {
+            "success": True,
+            "repository": f"{owner}/{repo}",
+            "branch": req.branch,
+            "clone_path": None,
+            "already_existed": False,
+            "is_remote": True,
+            "local_command": local_command,
+            "message": f"Repository {owner}/{repo} verified! Copy the command below to clone and start coding locally."
+        }
+
+    else:
+        # --- LOCAL MODE: clone to disk + launch CMD window ---
+        repo_dir = os.path.join(CLONE_BASE_DIR_LOCAL, repo)
+        os.makedirs(CLONE_BASE_DIR_LOCAL, exist_ok=True)
+
+        already_existed = os.path.isdir(repo_dir)
+
+        if not already_existed:
+            try:
+                result = subprocess.run(
+                    ["git", "clone", "--branch", req.branch, "--single-branch", clone_url, repo_dir],
+                    capture_output=True,
+                    text=True,
+                    timeout=120
+                )
+                if result.returncode != 0:
+                    stderr = result.stderr.strip()
+                    if os.path.isdir(repo_dir):
+                        shutil.rmtree(repo_dir, ignore_errors=True)
+                    if "not found" in stderr.lower() or "Repository not found" in stderr:
+                        raise HTTPException(404, f"Repository not found: {owner}/{repo}")
+                    raise HTTPException(500, f"Git clone failed: {stderr}")
+            except subprocess.TimeoutExpired:
                 if os.path.isdir(repo_dir):
                     shutil.rmtree(repo_dir, ignore_errors=True)
-                if "not found" in stderr.lower() or "Repository not found" in stderr:
-                    raise HTTPException(404, f"Repository not found: {owner}/{repo}")
-                raise HTTPException(500, f"Git clone failed: {stderr}")
-        except subprocess.TimeoutExpired:
-            if os.path.isdir(repo_dir):
-                shutil.rmtree(repo_dir, ignore_errors=True)
-            raise HTTPException(408, "Clone timed out (>120s). The repository may be too large.")
-        except HTTPException:
-            raise
-        except FileNotFoundError:
-            raise HTTPException(500, "Git is not installed or not in PATH.")
+                raise HTTPException(408, "Clone timed out (>120s). The repository may be too large.")
+            except HTTPException:
+                raise
+            except FileNotFoundError:
+                raise HTTPException(500, "Git is not installed or not in PATH.")
+            except Exception as e:
+                if os.path.isdir(repo_dir):
+                    shutil.rmtree(repo_dir, ignore_errors=True)
+                raise HTTPException(500, f"Clone failed: {str(e)}")
+
+        # Launch Claude Code in a new CMD window
+        try:
+            CREATE_NEW_CONSOLE = 0x00000010
+            subprocess.Popen(
+                ["cmd", "/k", f"cd /d {repo_dir} && claude"],
+                creationflags=CREATE_NEW_CONSOLE
+            )
         except Exception as e:
-            if os.path.isdir(repo_dir):
-                shutil.rmtree(repo_dir, ignore_errors=True)
-            raise HTTPException(500, f"Clone failed: {str(e)}")
+            raise HTTPException(500, f"Failed to launch Claude Code: {str(e)}")
 
-    # Launch Claude Code in a new CMD window
-    try:
-        CREATE_NEW_CONSOLE = 0x00000010
-        subprocess.Popen(
-            ["cmd", "/k", f"cd /d {repo_dir} && claude"],
-            creationflags=CREATE_NEW_CONSOLE
-        )
-    except Exception as e:
-        raise HTTPException(500, f"Failed to launch Claude Code: {str(e)}")
-
-    return {
-        "success": True,
-        "repository": f"{owner}/{repo}",
-        "branch": req.branch,
-        "clone_path": repo_dir,
-        "already_existed": already_existed,
-        "message": f"{'Repo already cloned. ' if already_existed else 'Cloned successfully. '}Claude Code launched!"
-    }
+        return {
+            "success": True,
+            "repository": f"{owner}/{repo}",
+            "branch": req.branch,
+            "clone_path": repo_dir,
+            "already_existed": already_existed,
+            "is_remote": False,
+            "local_command": None,
+            "message": f"{'Repo already cloned. ' if already_existed else 'Cloned successfully. '}Claude Code launched!"
+        }
